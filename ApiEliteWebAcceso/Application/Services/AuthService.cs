@@ -7,7 +7,12 @@ using ApiEliteWebAcceso.Application.Response;
 using ApiEliteWebAcceso.Domain.Contracts;
 using ApiEliteWebAcceso.Domain.Entities.Acceso;
 using AutoMapper;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using BCryptNet = BCrypt.Net.BCrypt;
+
 
 
 namespace ApiEliteWebAcceso.Application.Services
@@ -43,11 +48,33 @@ namespace ApiEliteWebAcceso.Application.Services
                     return Result<UsuarioLoginDto>.BadRequest([Resources.DocumentoOrPasswordIncorrect]);
                 }
 
+                DateTime fechaActual = DateTime.Now;
+                DateTime fechaFinToken = fechaActual.AddDays(1);
+                DateTime fechaFinTokenRefresh = fechaActual.AddDays(15);
+
+                //SesionUsuario sesionUsuario = new()
+                //{
+                //    UsuarioId = usuarioLogin.Id,
+                //    Ip = loginUsuario.Ip,
+                //    Dispositivo = loginUsuario.Dispositivo,
+                //    FechaInicio = fechaActual,
+                //    FechaFinToken = fechaFinToken,
+                //    FechaFinTokenRefresh = fechaFinTokenRefresh
+                //};
+
+                //SERVICIO.RegistrarSessionUsuario(sesionUsuario);
+                //SERVICIO.UpdateLoginUserLastSesion(usuarioLogin.Id);
+
                 List<Empresas> empresasUsuario = await _authRepository.ObtenerEmpresasPorUsuario(usuarioLogin.pk_usuario_c);
+
+                var token = GenerateJSONWebToken(usuarioLogin, fechaFinToken, "token");
+                var tokenRefresh = GenerateJSONWebToken(usuarioLogin, fechaFinTokenRefresh, "refresh");
 
                 UsuarioLoginDto usuarioTokenResult = new()
                 {
-                    Usuario = UsuarioToUsuarioDto(usuarioLogin, empresasUsuario)
+                    Usuario = UsuarioToUsuarioDto(usuarioLogin, empresasUsuario),
+                    Token = token,
+                    TokenRefresh = tokenRefresh
                 };
 
                 //var emptyDto = new UsuarioLoginDto();
@@ -57,6 +84,39 @@ namespace ApiEliteWebAcceso.Application.Services
             {
                 return Result<UsuarioLoginDto>.Failure(ex.Message);
             }
+        }
+
+
+
+        private string GenerateJSONWebToken(Usuarios usuario, DateTime fechaFin, string tipo)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwT:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            // Cualquier parametro nuevo añadirlo abajo
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, usuario.pk_usuario_c.ToString()),
+                //new Claim(ClaimTypes.Role, usuario.Usuario_Rol),
+                new Claim("type", tipo),
+                //new Claim("perfilCodigo", usuario.Perfil.Codigo),
+                //new Claim("tipoUsuarioId", usuario.TipoUsuarioId.ToString())
+
+                // Nos sirve para validar si es admin [Authorize(Roles="1")]
+                // O varios tipos asi [Authorize(Roles="1,2,3")]
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: fechaFin,
+                signingCredentials: credentials);
+
+            var encodetoken = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return encodetoken;
         }
 
         private UsuarioDto UsuarioToUsuarioDto(Usuarios usuario, List<Empresas> empresasUsuario)
