@@ -35,15 +35,15 @@ namespace ApiEliteWebAcceso.Application.Services
             try
             {
 
-                if (String.IsNullOrEmpty(loginUsuario.Documento))
-                    return Result<UsuarioLoginDto>.BadRequest([ String.Format(Resources.ParameterRequired, nameof(loginUsuario.Documento)) ]);
+                if (String.IsNullOrEmpty(loginUsuario.Usuario))
+                    return Result<UsuarioLoginDto>.BadRequest([ String.Format(Resources.ParameterRequired, nameof(loginUsuario.Usuario)) ]);
 
                 if (String.IsNullOrEmpty(loginUsuario.Password))
                     return Result<UsuarioLoginDto>.BadRequest([ String.Format(Resources.ParameterRequired, nameof(loginUsuario.Password)) ]);
 
-                Usuarios usuarioLogin = await _authRepository.ValidarLogin(loginUsuario.Documento);
+                ACC_USUARIO usuarioLogin = await _authRepository.ValidarLogin(loginUsuario.Usuario);
                 var Password = BCryptNet.HashPassword(loginUsuario.Password);
-                if (usuarioLogin == null || !BCryptNet.Verify(loginUsuario.Password, usuarioLogin.password_c))
+                if (usuarioLogin == null || !BCryptNet.Verify(loginUsuario.Password, usuarioLogin.PASSWORD_C))
                 {
                     return Result<UsuarioLoginDto>.BadRequest([Resources.DocumentoOrPasswordIncorrect]);
                 }
@@ -65,7 +65,7 @@ namespace ApiEliteWebAcceso.Application.Services
                 //SERVICIO.RegistrarSessionUsuario(sesionUsuario);
                 //SERVICIO.UpdateLoginUserLastSesion(usuarioLogin.Id);
 
-                List<Empresas> empresasUsuario = await _authRepository.ObtenerEmpresasPorUsuario(usuarioLogin.pk_usuario_c);
+                List<ACC_EMPRESA> empresasUsuario = await _authRepository.ObtenerEmpresasPorUsuario(usuarioLogin.PK_USUARIO_C);
 
                 var token = GenerateJSONWebToken(usuarioLogin, fechaFinToken, "token");
                 var tokenRefresh = GenerateJSONWebToken(usuarioLogin, fechaFinTokenRefresh, "refresh");
@@ -88,7 +88,7 @@ namespace ApiEliteWebAcceso.Application.Services
 
 
 
-        private string GenerateJSONWebToken(Usuarios usuario, DateTime fechaFin, string tipo)
+        private string GenerateJSONWebToken(ACC_USUARIO usuario, DateTime fechaFin, string tipo)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwT:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -97,7 +97,7 @@ namespace ApiEliteWebAcceso.Application.Services
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Sub, usuario.pk_usuario_c.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, usuario.PK_USUARIO_C.ToString()),
                 //new Claim(ClaimTypes.Role, usuario.Usuario_Rol),
                 new Claim("type", tipo),
                 //new Claim("perfilCodigo", usuario.Perfil.Codigo),
@@ -119,21 +119,21 @@ namespace ApiEliteWebAcceso.Application.Services
             return encodetoken;
         }
 
-        private UsuarioDto UsuarioToUsuarioDto(Usuarios usuario, List<Empresas> empresasUsuario)
+        private UsuarioDto UsuarioToUsuarioDto(ACC_USUARIO usuario, List<ACC_EMPRESA> empresasUsuario)
         {
             return new UsuarioDto
             {
-                idUsuarioDTO = usuario.pk_usuario_c,
-                documentoDTO = usuario.documento_c,
-                nombreDTO = usuario.nombre_c,
-                emailDTO = usuario.email_c,
-                terceroDTO = usuario.fk_tercero_c,
+                idUsuarioDTO = usuario.PK_USUARIO_C,
+                usuarioDTO = usuario.USUARIO_C,
+                documentoDTO = usuario.ID_USUARIO_C,
+                nombreDTO = usuario.NOMBRE_USUARIO_C,
+                emailDTO = usuario.MAIL_USUARIO_C,
                 Empresas = empresasUsuario.Select(e => new EmpresaDto
                 {
-                    idEmpresaDTO = e.pk_empresa_c,
-                    nombreDTO = e.nombre_c,
-                    logoDTO = e.logo_c,
-                    cadenaConexionDTO = e.cadena_conexion_c
+                    idEmpresaDTO = e.PK_EMPRESA_C,
+                    nombreDTO = e.NOMBRE_EMPRESA_C,
+                    logoDTO = e.LOGO_EMPRESA_C,
+                    //cadenaConexionDTO = e.cadena_conexion_c
                 }).ToList()
             };
         }

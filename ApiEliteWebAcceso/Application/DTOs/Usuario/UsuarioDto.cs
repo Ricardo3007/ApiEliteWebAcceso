@@ -8,6 +8,8 @@ namespace ApiEliteWebAcceso.Application.DTOs.Usuario
 
         public int idUsuarioDTO { get; set; }
 
+        public string? usuarioDTO { get; set; }
+
         public string? documentoDTO { get; set; }
 
         public string? nombreDTO { get; set; }
@@ -15,12 +17,6 @@ namespace ApiEliteWebAcceso.Application.DTOs.Usuario
         public string? emailDTO { get; set; }
 
         public string? passwordDTO { get; set; }
-
-        public int? terceroDTO { get; set; }
-
-        public DateTime? fechaCreacionDTO { get; set; }
-
-        public DateTime? fechaActualizacionDTO { get; set; }
 
         public string? estadoDTO { get; set; }
 
