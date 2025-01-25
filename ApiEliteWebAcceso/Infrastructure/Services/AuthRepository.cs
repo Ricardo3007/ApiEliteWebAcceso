@@ -15,24 +15,25 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             _dbConnection = dbConnection;
         }
 
-        public async Task<Usuarios> ValidarLogin(string documento)
+        public async Task<ACC_USUARIO> ValidarLogin(string usuario)
         {
-            var query = "SELECT * FROM Usuarios WHERE documento_c = @Documento and estado_c = @Estado";
+            var query = "SELECT * FROM ACC_USUARIO WHERE usuario_c = @Usuario and estado_c = @Estado";
 
-            var result = await _dbConnection.QueryFirstOrDefaultAsync<Usuarios>(query, new { Documento = documento, Estado = EstadoGeneralEnum.ACTIVO });
+            var result = await _dbConnection.QueryFirstOrDefaultAsync<ACC_USUARIO>(query, new { Usuario = usuario, Estado = EstadoGeneralEnum.ACTIVO });
 
             return result;
         }
 
-        public async Task<List<Empresas>> ObtenerEmpresasPorUsuario(int idUsuario)
+        public async Task<List<ACC_EMPRESA>> ObtenerEmpresasPorUsuario(int idUsuario)
         {
-            var query = @"
-                SELECT e.* 
-                FROM Usuario_Empresa ue
-                INNER JOIN Empresas e ON ue.fk_empresa_c = e.pk_empresa_c
-                WHERE ue.fk_usuario_c = @IdUsuario and e.estado_c = @Estado";
 
-            var result = await _dbConnection.QueryAsync<Empresas>(query, new { IdUsuario = idUsuario, Estado = EstadoGeneralEnum.ACTIVO });
+            var query = @"
+                SELECT DISTINCT FK_EMPRESA_C, ae.*
+                    FROM acc_permiso_usuario apu
+                    INNER JOIN ACC_EMPRESA ae on ae.PK_EMPRESA_C = apu.FK_EMPRESA_C
+                    WHERE apu.FK_USUARIO_C = @IdUsuario AND ae.ESTADO_C = @Estado";
+
+            var result = await _dbConnection.QueryAsync<ACC_EMPRESA>(query, new { IdUsuario = idUsuario, Estado = EstadoGeneralEnum.ACTIVO });
 
             return result.ToList();
         }

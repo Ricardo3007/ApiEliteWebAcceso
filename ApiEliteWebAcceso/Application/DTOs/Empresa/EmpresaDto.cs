@@ -10,10 +10,6 @@
 
         public string? logoDTO { get; set; }
 
-        public DateTime? fechaCreacionDTO { get; set; }
-
-        public DateTime? fechaActualizacionDTO { get; set; }
-
         public string? estadoDTO { get; set; }
 
     }

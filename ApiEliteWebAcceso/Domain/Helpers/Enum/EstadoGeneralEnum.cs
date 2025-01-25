@@ -5,11 +5,11 @@
         /// <summary>
         /// activo
         /// </summary>
-        public const string ACTIVO = "activo";
+        public const string ACTIVO = "A";
 
         /// <summary>
         /// inactivo
         /// </summary>
-        public const string INACTIVO = "inactivo";
+        public const string INACTIVO = "I";
     }
 }
