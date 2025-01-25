@@ -6,6 +6,6 @@ namespace ApiEliteWebAcceso.Domain.Contracts
 {
     public interface IMenuRepository
     {
-        Task<List<Menu_Usuario>> ObtenerMenuUsuarioRolEmpresa(int idUsuario, int idEmpresa);
+        Task<List<MenuOption>> ObtenerMenuUsuarioRolEmpresa(int idUsuario, int idEmpresa);
     }
 }

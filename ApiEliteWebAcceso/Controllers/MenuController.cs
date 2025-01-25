@@ -15,7 +15,7 @@ namespace ApiEliteWebAcceso.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> Menu(int idUsuario, int idEmpresa)
         {
-            var result = await _menuService.ObtenerMenuUsuarioRolEmpresa(idUsuario, idEmpresa);
+            var result = await _menuService.getMenuUsuario(idUsuario, idEmpresa);
             return result.GetHttpResponse();
         }
 

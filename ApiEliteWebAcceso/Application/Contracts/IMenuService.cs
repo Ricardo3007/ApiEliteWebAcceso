@@ -7,6 +7,6 @@ namespace ApiEliteWebAcceso.Application.Contracts
 {
     public interface IMenuService
     {
-        Task<Result<UsuarioConMenuDTO>> ObtenerMenuUsuarioRolEmpresa(int idUsuario, int idEmpresa);
+        Task<Result<List<MenuDto>>> getMenuUsuario(int idUsuario, int idEmpresa);
     }
 }

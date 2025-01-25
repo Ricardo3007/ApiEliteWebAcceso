@@ -18,58 +18,39 @@ namespace ApiEliteWebAcceso.Application.Services
             _menuRepository = menuRepository;
         }
 
-        public async Task<Result<UsuarioConMenuDTO>> ObtenerMenuUsuarioRolEmpresa(int idUsuario,int idEmpresa)
+        public async Task<Result<List<MenuDto>>> getMenuUsuario(int idUsuario,int idEmpresa)
         {
             try
             {
+                var items = await _menuRepository.ObtenerMenuUsuarioRolEmpresa(idUsuario,idEmpresa);
 
-
-                List<Menu_Usuario> menu = await _menuRepository.ObtenerMenuUsuarioRolEmpresa(idUsuario,idEmpresa);
-
-                var menuSinDuplicados = menu
-                  .GroupBy(x => new { x.Menu, x.URL, x.Menu_Padre })  // Agrupar por las propiedades relevantes
-                  .Select(g => g.First())                                      // Seleccionar solo el primer elemento de cada grupo
-                  .ToList();
-
-                // Agrupar por los campos 'usuarioDTO', 'rolDTO' y 'empresaDTO'
-                var grupo = menu
-                    .GroupBy(x => new { x.Usuario, x.Rol, x.Empresa })  // Agrupar solo por estos tres campos
-                    .Select(g => new UsuarioConMenuDTO
-                    {
-                        UsuarioDTO = g.Key.Usuario,    // Asignar 'usuarioDTO'
-                        RolDTO = g.Key.Rol,            // Asignar 'rolDTO'
-                        EmpresaDTO = g.Key.Empresa,    // Asignar 'empresaDTO'
-                        Menu = g.Select(x => new MenuItemDTO  // Mapear los menús dentro de este grupo
-                        {
-                            MenuDTO = x.Menu,
-                            MenuPadreDTO = x.Menu_Padre,
-                            UrlDTO = x.URL
-                        }).ToList()
-                    })
-                    .FirstOrDefault();
-
-
-                // Luego, puedes asignar 'menuList' a la propiedad 'menu' de 'UsuarioMenuDTO'
-                UsuarioConMenuDTO usuarioMenuDTO = new UsuarioConMenuDTO
+                // Crear un diccionario para facilitar el acceso por ID
+                var lookup = items.ToLookup(item => (int?)item.Parent_C); // Agrupar por Parent
+                var allItems = items.ToDictionary(item => (int)item.PK_Opcion_Menu_C, item => new MenuDto
                 {
-                    UsuarioDTO = "Juan P rez",  // Aquí puedes poner los valores dinámicos
-                    RolDTO = "Administrador",    // Aquí puedes poner los valores dinámicos
-                    EmpresaDTO = "Empresa1 S.A.", // Aquí puedes poner los valores dinámicos
-                    Menu = menuSinDuplicados.Select(x => new MenuItemDTO
+                    Label = item.Text_C,
+                    Icon = item.Icono_C,
+                    Url = item.Url_C,
+                    IsExpanded = false
+                });
+
+                // Construir la jerarquía
+                foreach (var item in items)
+                {
+                    if (item.Parent_C != null)
                     {
-                        MenuDTO = x.Menu,
-                        MenuPadreDTO = x.Menu_Padre,
-                        UrlDTO = x.URL
-                    }).ToList()
-                };
+                        var parentItem = allItems[(int)item.Parent_C];
+                        parentItem.Children.Add(allItems[(int)item.PK_Opcion_Menu_C]);
+                    }
+                }
 
-
-
-                return Result<UsuarioConMenuDTO>.Success(usuarioMenuDTO);
+                return Result<List<MenuDto>>.Success(items.Where(item => item.Parent_C == null)
+                            .Select(item => allItems[(int)item.PK_Opcion_Menu_C])
+                            .ToList());
             }
             catch (Exception ex)
             {
-                return Result<UsuarioConMenuDTO>.Failure(ex.Message);
+                return Result<List<MenuDto>>.Failure(ex.Message);
             }
         }
     }
