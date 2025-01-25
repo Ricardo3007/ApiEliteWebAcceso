@@ -14,5 +14,6 @@
         public string Nombre_Aplicativo_C { get; set; } // Nombre completo del aplicativo
         public int Nivel { get; set; } // Nivel de profundidad en la jerarquía del menú
         public string Jerarquia { get; set; } // Cadena representando la jerarquía del menú
+        public string ParentName { get; set; } // Nombre del menú padre
     }
 }

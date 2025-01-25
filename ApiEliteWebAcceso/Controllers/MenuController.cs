@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ApiEliteWebAcceso.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class MenuController : ControllerBase
     {
         private readonly IMenuService _menuService;
@@ -12,10 +14,10 @@ namespace ApiEliteWebAcceso.Controllers
             _menuService = menuService;
         }
 
-        [HttpPost("[action]")]
-        public async Task<IActionResult> Menu(int idUsuario, int idEmpresa)
+        [HttpGet("[action]/{idUsuario}/{idEmpresa}")]
+        public async Task<IActionResult> GetMenuUsuario(int idUsuario, int idEmpresa)
         {
-            var result = await _menuService.getMenuUsuario(idUsuario, idEmpresa);
+            var result = await _menuService.GetMenuUsuario(idUsuario, idEmpresa);
             return result.GetHttpResponse();
         }
 
