@@ -29,5 +29,12 @@ namespace ControlAccesoBack.Controllers
             return result.GetHttpResponse();
         }
 
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Menu(LoginUsuarioDto MenuEmpresa)
+        {
+            var result = await _autenticacionService.ValidarLogin(MenuEmpresa);
+            return result.GetHttpResponse();
+        }
+
     }
 }

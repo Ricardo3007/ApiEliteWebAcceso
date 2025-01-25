@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <Folder Include="Application\Mapper\" />
-    <Folder Include="Domain\Entities\" />
     <Folder Include="Infrastructure\Context\" />
     <Folder Include="Infrastructure\DependencyInjection\" />
   </ItemGroup>
