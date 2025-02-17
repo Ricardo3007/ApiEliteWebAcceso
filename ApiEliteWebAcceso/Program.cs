@@ -45,7 +45,7 @@ builder.Services.AddCors(options =>
     else
     {
         options.AddPolicy(name: "CorsPolicy", builder => builder
-            .WithOrigins("http://www.elitesoftweb.com")  // Configuración específica para producción
+            .WithOrigins("http://192.168.100.22:81")  // Configuración específica para producción
             .AllowAnyMethod()
             .AllowAnyHeader()
         );
@@ -61,6 +61,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
