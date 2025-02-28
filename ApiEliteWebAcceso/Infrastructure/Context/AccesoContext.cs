@@ -243,7 +243,7 @@ public partial class AccesoContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.PASSWORD_C)
-                .HasMaxLength(20)
+                .HasMaxLength(200)
                 .IsUnicode(false);
             entity.Property(e => e.USUARIO_C)
                 .HasMaxLength(20)

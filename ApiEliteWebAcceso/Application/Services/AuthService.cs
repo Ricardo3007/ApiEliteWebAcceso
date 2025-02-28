@@ -52,23 +52,10 @@ namespace ApiEliteWebAcceso.Application.Services
                 DateTime fechaFinToken = fechaActual.AddDays(1);
                 DateTime fechaFinTokenRefresh = fechaActual.AddDays(15);
 
-                //SesionUsuario sesionUsuario = new()
-                //{
-                //    UsuarioId = usuarioLogin.Id,
-                //    Ip = loginUsuario.Ip,
-                //    Dispositivo = loginUsuario.Dispositivo,
-                //    FechaInicio = fechaActual,
-                //    FechaFinToken = fechaFinToken,
-                //    FechaFinTokenRefresh = fechaFinTokenRefresh
-                //};
-
-                //SERVICIO.RegistrarSessionUsuario(sesionUsuario);
-                //SERVICIO.UpdateLoginUserLastSesion(usuarioLogin.Id);
-
                 List<ACC_EMPRESA> empresasUsuario = await _authRepository.ObtenerEmpresasPorUsuario(usuarioLogin.PK_USUARIO_C);
 
-                var token = GenerateJSONWebToken(usuarioLogin, fechaFinToken, "token");
-                var tokenRefresh = GenerateJSONWebToken(usuarioLogin, fechaFinTokenRefresh, "refresh");
+                var token = GenerateJSONWebToken(usuarioLogin, empresasUsuario, fechaFinToken, "token");
+                var tokenRefresh = GenerateJSONWebToken(usuarioLogin, empresasUsuario, fechaFinTokenRefresh, "refresh");
 
                 UsuarioLoginDto usuarioTokenResult = new()
                 {
@@ -88,24 +75,27 @@ namespace ApiEliteWebAcceso.Application.Services
 
 
 
-        private string GenerateJSONWebToken(ACC_USUARIO usuario, DateTime fechaFin, string tipo)
+        private string GenerateJSONWebToken(ACC_USUARIO usuario, List<ACC_EMPRESA> empresas, DateTime fechaFin, string tipo)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwT:Key"]));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            // Cualquier parametro nuevo añadirlo abajo
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Sub, usuario.PK_USUARIO_C.ToString()),
-                //new Claim(ClaimTypes.Role, usuario.Usuario_Rol),
-                new Claim("type", tipo),
-                //new Claim("perfilCodigo", usuario.Perfil.Codigo),
-                //new Claim("tipoUsuarioId", usuario.TipoUsuarioId.ToString())
-
-                // Nos sirve para validar si es admin [Authorize(Roles="1")]
-                // O varios tipos asi [Authorize(Roles="1,2,3")]
+                new Claim("type", tipo)
             };
+
+            // Agregamos las credenciales de cada empresa como claims
+            foreach (var empresa in empresas)
+            {
+                var credenciales = Convert.ToBase64String(Encoding.UTF8.GetBytes(
+                    $"{empresa.SERVIDOR_BD_C}|{empresa.NOMBRE_BD_C}|{empresa.USUARIO_BD_C}|{empresa.PASSWORD_BD_C}"
+                ));
+
+                claims.Add(new Claim($"empresa_{empresa.PK_EMPRESA_C}", credenciales));
+            }
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
@@ -114,9 +104,7 @@ namespace ApiEliteWebAcceso.Application.Services
                 expires: fechaFin,
                 signingCredentials: credentials);
 
-            var encodetoken = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return encodetoken;
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         private UsuarioDto UsuarioToUsuarioDto(ACC_USUARIO usuario, List<ACC_EMPRESA> empresasUsuario)
@@ -128,6 +116,7 @@ namespace ApiEliteWebAcceso.Application.Services
                 documentoDTO = usuario.ID_USUARIO_C,
                 nombreDTO = usuario.NOMBRE_USUARIO_C,
                 emailDTO = usuario.MAIL_USUARIO_C,
+                tipoUsuarioDTO = usuario.TIPO_USUARIO_C,
                 Empresas = empresasUsuario.Select(e => new EmpresaDto
                 {
                     idEmpresaDTO = e.PK_EMPRESA_C,
