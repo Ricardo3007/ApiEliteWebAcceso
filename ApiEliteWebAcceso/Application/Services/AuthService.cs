@@ -122,7 +122,7 @@ namespace ApiEliteWebAcceso.Application.Services
                     idEmpresaDTO = e.PK_EMPRESA_C,
                     nombreDTO = e.NOMBRE_EMPRESA_C,
                     logoDTO = e.LOGO_EMPRESA_C,
-                    //cadenaConexionDTO = e.cadena_conexion_c
+                    grupoEmpresaDTO = e.FK_GRUPO_EMPRESA_C
                 }).ToList()
             };
         }

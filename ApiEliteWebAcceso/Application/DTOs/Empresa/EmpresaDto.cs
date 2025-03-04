@@ -12,5 +12,7 @@
 
         public string? estadoDTO { get; set; }
 
+        public int grupoEmpresaDTO { get; set; }
+
     }
 }
