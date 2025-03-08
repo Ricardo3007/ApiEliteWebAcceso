@@ -26,10 +26,12 @@ builder.Services.AddSingleton<IDbConnection>(provider => new SqlConnection(conne
 // Registra el repositorio
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+builder.Services.AddScoped<IEmpresaRepository, EmpresaRepository>();
 
 // Registra servicios
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMenuService, MenuService>();
+builder.Services.AddScoped<IEmpresaService, EmpresaService>();
 
 #region CORS
 builder.Services.AddCors(options =>
