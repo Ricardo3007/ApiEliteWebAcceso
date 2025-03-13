@@ -21,6 +21,30 @@ namespace ApiEliteWebAcceso.Application.Services
             _config = config;
             _empresaRepository = authRepository;
         }
+
+        public async Task<Result<GrupoEmpresaDto>> CreateGrupoEmpresa(GrupoEmpresaDto createGrupoEmpresa)
+        {
+            // Llamar al método del repositorio para crear el grupo de empresa
+            var newGrupoEmpresa = await _empresaRepository.CreateGrupoEmpresa(createGrupoEmpresa);
+
+            // Mapear el resultado a GrupoEmpresaDto
+            var result = new GrupoEmpresaDto
+            {
+                idGrupoEmpresaDTO = newGrupoEmpresa.idGrupoEmpresaDTO,
+                nombreGrupoDTO = newGrupoEmpresa.nombreGrupoDTO,
+                estadoDTO = newGrupoEmpresa.estadoDTO
+            };
+
+            return Result<GrupoEmpresaDto>.Success(result);
+        }
+
+        public async Task<Result<bool>> DeleteGrupoEmpresa(int idGrupoEmpresa)
+        {
+            var isDeleted = await _empresaRepository.DeleteGrupoEmpresa(idGrupoEmpresa);
+            // Devolver el ID del grupo de empresa eliminado si se eliminó correctamente, de lo contrario devolver -1
+            return  Result<bool>.Success(isDeleted);
+        }
+
         public async Task<Result<List<GrupoEmpresaDto>>> GetGrupoEmpresa()
         {
             try
@@ -75,6 +99,22 @@ namespace ApiEliteWebAcceso.Application.Services
             {
                 return Result<GrupoEmpresaDto>.Failure(ex.Message);
             }
+        }
+
+        public async Task<Result<GrupoEmpresaDto>> UpdateGrupoEmpresa(GrupoEmpresaDto updateGrupoEmpresa)
+        {
+            // Llamar al método del repositorio para actualizar el grupo de empresa
+            var updatedGrupoEmpresa = await _empresaRepository.UpdateGrupoEmpresa(updateGrupoEmpresa);
+
+            // Mapear el resultado a GrupoEmpresaDto
+            var result = new GrupoEmpresaDto
+            {
+                idGrupoEmpresaDTO = updatedGrupoEmpresa.idGrupoEmpresaDTO,
+                nombreGrupoDTO = updatedGrupoEmpresa.nombreGrupoDTO,
+                estadoDTO = updatedGrupoEmpresa.estadoDTO
+            };
+
+            return Result<GrupoEmpresaDto>.Success(result);  
         }
     }
 }
