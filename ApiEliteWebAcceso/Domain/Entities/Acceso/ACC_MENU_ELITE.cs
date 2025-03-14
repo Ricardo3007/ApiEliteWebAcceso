@@ -21,8 +21,6 @@ public partial class ACC_MENU_ELITE
 
     public string ESTADO_C { get; set; } = null!;
 
-    public string TIPO_C { get; set; } = null!;
-
 
     public virtual ICollection<ACC_OPCIONES_ROL> ACC_OPCIONES_ROL { get; set; } = new List<ACC_OPCIONES_ROL>();
 

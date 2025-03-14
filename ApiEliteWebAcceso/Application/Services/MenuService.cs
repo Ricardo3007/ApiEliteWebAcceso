@@ -49,7 +49,6 @@ namespace ApiEliteWebAcceso.Application.Services
                             Icon = item.Icono_C,
                             Url = item.Url_C,
                             Code = item.Iniciales_Aplicativo_C,
-                            Tipo = item.Tipo_C,
                             IsExpanded = false
                         });
 
