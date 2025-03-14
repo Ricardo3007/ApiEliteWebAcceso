@@ -9,6 +9,7 @@ namespace ApiEliteWebAcceso.Application.DTOs.Menu
         public string Url { get; set; }
         public string Code { get; set; }
         public bool? IsExpanded { get; set; }
+        public string Tipo { get; set; }
         public List<MenuDto> Children { get; set; } = new List<MenuDto>();
     }
 }

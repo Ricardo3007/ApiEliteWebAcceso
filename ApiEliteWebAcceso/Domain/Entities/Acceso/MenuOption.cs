@@ -6,7 +6,7 @@
         public int FK_Aplicativo_C { get; set; } // Identificador del aplicativo asociado
         public string Url_C { get; set; } // URL asociada al menú
         public int? Parent_C { get; set; } // Identificador del menú padre (nullable)
-        public string Text_C { get; set; } // Texto del menú
+        public string Text_C { get; set; } // Texto del menúccc
         public string Descripcion_C { get; set; } // Descripción del menú
         public string Icono_C { get; set; } // Ícono asociado al menú
         public string Estado_C { get; set; } // Estado del menú (ejemplo: 'A' para activo)
@@ -15,5 +15,7 @@
         public int Nivel { get; set; } // Nivel de profundidad en la jerarquía del menú
         public string Jerarquia { get; set; } // Cadena representando la jerarquía del menú
         public string ParentName { get; set; } // Nombre del menú padre
+        public string Tipo_C { get; set; } = null!;
+
     }
 }
