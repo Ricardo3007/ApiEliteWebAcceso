@@ -36,14 +36,14 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
-        [HttpPost("[action]")]
+        [HttpPut("[action]")]
         public async Task<IActionResult> UpdateGrupoEmpresa([FromBody] GrupoEmpresaDto grupoEmpresaDto)
         {
             var result = await _empresaService.UpdateGrupoEmpresa(grupoEmpresaDto);
             return result.GetHttpResponse();
         }
 
-        [HttpPost("[action]")]
+        [HttpDelete("DeleteGrupoEmpresaID/{idGrupoEmpresa}")]
         public async Task<IActionResult> DeleteGrupoEmpresaID(int idGrupoEmpresa)
         {
             var result = await _empresaService.DeleteGrupoEmpresa(idGrupoEmpresa);
