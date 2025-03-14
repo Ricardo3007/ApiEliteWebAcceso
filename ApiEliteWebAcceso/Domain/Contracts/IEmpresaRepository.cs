@@ -12,5 +12,11 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<GrupoEmpresaDto> UpdateGrupoEmpresa(GrupoEmpresaDto updateGrupoEmpresa);
         Task<bool> DeleteGrupoEmpresa(int idGrupoEmpresa);
 
+        Task<List<ACC_EMPRESA>> GetEmpresa();
+        Task<ACC_EMPRESA> GetEmpresaID(int idEmpresa);
+        Task<EmpresaDto> CreateEmpresa(EmpresaDto createEmpresa);
+        Task<bool> UpdateEmpresa(EmpresaDto updateEmpresa);
+        Task<bool> DeleteEmpresa(int idEmpresa);
+
     }
 }

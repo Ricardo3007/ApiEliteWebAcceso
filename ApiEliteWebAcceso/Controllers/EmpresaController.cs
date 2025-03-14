@@ -50,6 +50,43 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
+        //EMPRESA
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetEmpresa()
+        {
+            var result = await _empresaService.GetEmpresa();
+            return result.GetHttpResponse();
+        }
+
+        [HttpGet("[action]/{idEmpresa}")]
+        public async Task<IActionResult> GetEmpresaID(int idEmpresa)
+        {
+            var result = await _empresaService.GetEmpresaID(idEmpresa);
+            return result.GetHttpResponse();
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreateEmpresa([FromBody] EmpresaDto empresaDto)
+        {
+            var result = await _empresaService.CreateEmpresa(empresaDto);
+            return result.GetHttpResponse();
+        }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateEmpresa([FromBody] EmpresaDto empresaDto)
+        {
+            var result = await _empresaService.UpdateEmpresa(empresaDto);
+            return result.GetHttpResponse();
+        }
+
+        [HttpDelete("[action]")]
+        public async Task<IActionResult> DeleteEmpresaID(int idEmpresa)
+        {
+            var result = await _empresaService.DeleteEmpresa(idEmpresa);
+            return result.GetHttpResponse();
+        }
+
 
     }
 }

@@ -120,6 +120,172 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             return rowsAffected > 0;
         }
 
+        public async Task<List<ACC_EMPRESA>> GetEmpresa()
+        {
+            string consulta = @"SELECT 
+                               [PK_EMPRESA_C]
+                              ,[NOMBRE_EMPRESA_C]
+                              ,[FK_GRUPO_EMPRESA_C]
+                              ,[ID_EMPRESA_C]
+                              ,[LOGO_EMPRESA_C]
+                              ,[NOMBRE_BD_C]
+                              ,[SERVIDOR_BD_C]
+                              ,[USUARIO_BD_C]
+                              ,[PASSWORD_BD_C]
+                              ,[ESTADO_C] FROM ACC_EMPRESA";
+
+            var result = await _dbConnection.QueryAsync<ACC_EMPRESA>(consulta);
+
+            return result.ToList();
+        }
+
+        public async Task<ACC_EMPRESA> GetEmpresaID(int idEmpresa)
+        {
+            string consulta = @"SELECT 
+                                   [PK_EMPRESA_C]
+                                  ,[NOMBRE_EMPRESA_C]
+                                  ,[FK_GRUPO_EMPRESA_C]
+                                  ,[ID_EMPRESA_C]
+                                  ,[LOGO_EMPRESA_C]
+                                  ,[NOMBRE_BD_C]
+                                  ,[SERVIDOR_BD_C]
+                                  ,[USUARIO_BD_C]
+                                  ,[PASSWORD_BD_C]
+                                  ,[ESTADO_C]
+                                FROM ACC_EMPRESA WHERE PK_EMPRESA_C = @idEmpresa ";
+
+            return await _dbConnection.QueryFirstOrDefaultAsync<ACC_EMPRESA>(consulta, new { idEmpresa = idEmpresa});
+
+        }
+
+        public async Task<EmpresaDto> CreateEmpresa(EmpresaDto createEmpresaDto)
+        {
+            // Crear la consulta SQL para insertar el nuevo registro
+            var sqlInsert = @"
+                INSERT INTO [dbo].[ACC_EMPRESA]
+                   ([NOMBRE_EMPRESA_C]
+                   ,[FK_GRUPO_EMPRESA_C]
+                   ,[ID_EMPRESA_C]
+                   ,[LOGO_EMPRESA_C]
+                   ,[NOMBRE_BD_C]
+                   ,[SERVIDOR_BD_C]
+                   ,[USUARIO_BD_C]
+                   ,[PASSWORD_BD_C]
+                   ,[ESTADO_C])
+             VALUES
+                   (@NOMBRE_EMPRESA_C
+                   ,@FK_GRUPO_EMPRESA_C
+                   ,@ID_EMPRESA_C
+                   ,@LOGO_EMPRESA_C
+                   ,@NOMBRE_BD_C
+                   ,@SERVIDOR_BD_C
+                   ,@USUARIO_BD_C
+                   ,@PASSWORD_BD_C
+                   ,@ESTADO_C);
+                SELECT CAST(SCOPE_IDENTITY() as int);
+            ";
+
+            // Crear los parámetros para la consulta
+            var parameters = new
+            {
+                NOMBRE_EMPRESA_C = createEmpresaDto.nombreDTO ?? string.Empty,
+                FK_GRUPO_EMPRESA_C = createEmpresaDto.grupoEmpresaDTO ?? (object)DBNull.Value, // Usar DBNull.Value si es nulo
+                ID_EMPRESA_C = createEmpresaDto.idEmpresaC_DTO ?? string.Empty,
+                LOGO_EMPRESA_C = createEmpresaDto.logoDTO ?? string.Empty,
+                NOMBRE_BD_C = createEmpresaDto.nombreBdDTO ?? string.Empty,
+                SERVIDOR_BD_C = createEmpresaDto.servidorBdDTO ?? string.Empty,
+                USUARIO_BD_C = createEmpresaDto.usuarioBdDTO ?? string.Empty,
+                PASSWORD_BD_C = createEmpresaDto.passwordBdDTO ?? string.Empty,
+                ESTADO_C = createEmpresaDto.estadoDTO ?? string.Empty
+            };
+
+            // Ejecutar la consulta y obtener el ID del nuevo registro
+            var newId = await _dbConnection.ExecuteScalarAsync<int>(sqlInsert, parameters);
+
+            // Crear y devolver el nuevo objeto EmpresaDto
+            var newEmpresa = new EmpresaDto
+            {
+                idEmpresaDTO = newId,
+                nombreDTO = createEmpresaDto.nombreDTO,
+                grupoEmpresaDTO = createEmpresaDto.grupoEmpresaDTO,
+                idEmpresaC_DTO = createEmpresaDto.idEmpresaC_DTO,
+                logoDTO = createEmpresaDto.logoDTO,
+                nombreBdDTO = createEmpresaDto.nombreBdDTO,
+                servidorBdDTO = createEmpresaDto.servidorBdDTO,
+                usuarioBdDTO = createEmpresaDto.usuarioBdDTO,
+                passwordBdDTO = createEmpresaDto.passwordBdDTO,
+                estadoDTO = createEmpresaDto.estadoDTO
+            };
+
+            return newEmpresa;
+        }
+        public async Task<bool> UpdateEmpresa(EmpresaDto updateEmpresaDto)
+        {
+            // Crear la consulta SQL para actualizar el registro
+             var sqlUpdate = @"
+                UPDATE [dbo].[ACC_EMPRESA]
+                SET
+                    [NOMBRE_EMPRESA_C] = ISNULL(@NOMBRE_EMPRESA_C, [NOMBRE_EMPRESA_C]),
+                    [FK_GRUPO_EMPRESA_C] = ISNULL(@FK_GRUPO_EMPRESA_C, [FK_GRUPO_EMPRESA_C]),
+                    [ID_EMPRESA_C] = ISNULL(@ID_EMPRESA_C, [ID_EMPRESA_C]),
+                    [LOGO_EMPRESA_C] = ISNULL(@LOGO_EMPRESA_C, [LOGO_EMPRESA_C]),
+                    [NOMBRE_BD_C] = ISNULL(@NOMBRE_BD_C, [NOMBRE_BD_C]),
+                    [SERVIDOR_BD_C] = ISNULL(@SERVIDOR_BD_C, [SERVIDOR_BD_C]),
+                    [USUARIO_BD_C] = ISNULL(@USUARIO_BD_C, [USUARIO_BD_C]),
+                    [PASSWORD_BD_C] = ISNULL(@PASSWORD_BD_C, [PASSWORD_BD_C]),
+                    [ESTADO_C] = ISNULL(@ESTADO_C, [ESTADO_C])
+                WHERE
+                    [PK_EMPRESA_C] = @PK_EMPRESA_C;
+            ";
+
+            // Crear los parámetros para la consulta
+            var parameters = new
+            {
+                PK_EMPRESA_C =  updateEmpresaDto.idEmpresaDTO ?? throw new ArgumentException("El ID de la empresa es obligatorio para actualizar."), 
+                NOMBRE_EMPRESA_C = updateEmpresaDto.nombreDTO,
+                FK_GRUPO_EMPRESA_C = updateEmpresaDto.grupoEmpresaDTO,
+                ID_EMPRESA_C = updateEmpresaDto.idEmpresaC_DTO,
+                LOGO_EMPRESA_C = updateEmpresaDto.logoDTO,
+                NOMBRE_BD_C = updateEmpresaDto.nombreBdDTO,
+                SERVIDOR_BD_C = updateEmpresaDto.servidorBdDTO,
+                USUARIO_BD_C = updateEmpresaDto.usuarioBdDTO,
+                PASSWORD_BD_C = updateEmpresaDto.passwordBdDTO,
+                ESTADO_C = updateEmpresaDto.estadoDTO
+            };
+
+            // Ejecutar la consulta y obtener el número de filas afectadas
+            var rowsAffected = await _dbConnection.ExecuteAsync(sqlUpdate, parameters);
+
+            // Retornar true si al menos una fila fue actualizada
+            return rowsAffected > 0;
+        }
+
+        public async Task<bool> DeleteEmpresa(int idEmpresaC)
+        {
+            // Validar que el ID de la empresa sea válido (mayor que 0)
+            if (idEmpresaC <= 0)
+            {
+                throw new ArgumentException("El ID de la empresa debe ser un valor entero positivo.");
+            }
+
+            // Crear la consulta SQL para eliminar el registro
+            var sqlDelete = @"
+                    DELETE FROM [dbo].[ACC_EMPRESA]
+                    WHERE [PK_EMPRESA_C] = @PK_EMPRESA_C;
+                ";
+
+            // Crear los parámetros para la consulta
+            var parameters = new
+            {
+                PK_EMPRESA_C = idEmpresaC
+            };
+
+            // Ejecutar la consulta y obtener el número de filas afectadas
+            var rowsAffected = await _dbConnection.ExecuteAsync(sqlDelete, parameters);
+
+            // Retornar true si al menos una fila fue eliminada
+            return rowsAffected > 0;
+        }
 
     }
 }

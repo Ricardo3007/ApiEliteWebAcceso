@@ -22,6 +22,23 @@ namespace ApiEliteWebAcceso.Application.Services
             _empresaRepository = authRepository;
         }
 
+        public async Task<Result<EmpresaDto>> CreateEmpresa(EmpresaDto createGrupoEmpresa)
+        {
+            return Result<EmpresaDto>.Success(await _empresaRepository.CreateEmpresa(createGrupoEmpresa));
+        }
+
+
+        public async Task<Result<bool>> DeleteEmpresa(int idEmpresa)
+        {
+            return Result<bool>.Success(await _empresaRepository.DeleteEmpresa(idEmpresa));
+        }
+
+
+        public async Task<Result<bool>> UpdateEmpresa(EmpresaDto updateEmpresa)
+        {
+            return Result<bool>.Success(await _empresaRepository.UpdateEmpresa(updateEmpresa));
+        }
+
         public async Task<Result<GrupoEmpresaDto>> CreateGrupoEmpresa(GrupoEmpresaDto createGrupoEmpresa)
         {
             // Llamar al método del repositorio para crear el grupo de empresa
@@ -38,12 +55,80 @@ namespace ApiEliteWebAcceso.Application.Services
             return Result<GrupoEmpresaDto>.Success(result);
         }
 
+
         public async Task<Result<bool>> DeleteGrupoEmpresa(int idGrupoEmpresa)
         {
             var isDeleted = await _empresaRepository.DeleteGrupoEmpresa(idGrupoEmpresa);
             // Devolver el ID del grupo de empresa eliminado si se eliminó correctamente, de lo contrario devolver -1
             return  Result<bool>.Success(isDeleted);
         }
+
+        public async Task<Result<List<EmpresaDto>>> GetEmpresa()
+        {
+            try
+            {
+                // Obtener la lista de empresas desde el repositorio
+                var empresas = await _empresaRepository.GetEmpresa();
+
+                // Mapear la lista de ACC_EMPRESA a EmpresaDto
+                var empresasDto = empresas.Select(e => new EmpresaDto
+                {
+                    idEmpresaDTO = e.PK_EMPRESA_C,
+                    nombreDTO = e.NOMBRE_EMPRESA_C,
+                    grupoEmpresaDTO = e.FK_GRUPO_EMPRESA_C,
+                    idEmpresaC_DTO = e.ID_EMPRESA_C,
+                    logoDTO = e.LOGO_EMPRESA_C,
+                    nombreBdDTO = e.NOMBRE_BD_C,
+                    servidorBdDTO = e.SERVIDOR_BD_C,
+                    usuarioBdDTO = e.USUARIO_BD_C,
+                    passwordBdDTO = e.PASSWORD_BD_C,
+                    estadoDTO = e.ESTADO_C,
+                    cadenaConexionDTO = $"Server={e.SERVIDOR_BD_C};Database={e.NOMBRE_BD_C};User Id={e.USUARIO_BD_C};Password={e.PASSWORD_BD_C};"
+                }).ToList();
+
+                return Result<List<EmpresaDto>>.Success(empresasDto);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<EmpresaDto>>.Failure(ex.Message);
+            }
+        }
+
+
+        public async Task<Result<EmpresaDto>> GetEmpresaID(int idEmpresa)
+        {
+            try
+            {
+                var empresa = await _empresaRepository.GetEmpresaID(idEmpresa);
+
+                if (empresa == null)
+                {
+                    return Result<EmpresaDto>.Failure("Empresa no encontrada.");
+                }
+
+                var empresaDto = new EmpresaDto
+                {
+                    idEmpresaDTO = empresa.PK_EMPRESA_C,
+                    nombreDTO = empresa.NOMBRE_EMPRESA_C,
+                    grupoEmpresaDTO = empresa.FK_GRUPO_EMPRESA_C,
+                    idEmpresaC_DTO = empresa.ID_EMPRESA_C,
+                    logoDTO = empresa.LOGO_EMPRESA_C,
+                    nombreBdDTO = empresa.NOMBRE_BD_C,
+                    servidorBdDTO = empresa.SERVIDOR_BD_C,
+                    usuarioBdDTO = empresa.USUARIO_BD_C,
+                    passwordBdDTO = empresa.PASSWORD_BD_C,
+                    estadoDTO = empresa.ESTADO_C,
+                    cadenaConexionDTO = $"Server={empresa.SERVIDOR_BD_C};Database={empresa.NOMBRE_BD_C};User Id={empresa.USUARIO_BD_C};Password={empresa.PASSWORD_BD_C};"
+                };
+
+                return Result<EmpresaDto>.Success(empresaDto);
+            }
+            catch (Exception ex)
+            {
+                return Result<EmpresaDto>.Failure(ex.Message);
+            }
+        }
+
 
         public async Task<Result<List<GrupoEmpresaDto>>> GetGrupoEmpresa()
         {
@@ -101,6 +186,7 @@ namespace ApiEliteWebAcceso.Application.Services
             }
         }
 
+
         public async Task<Result<GrupoEmpresaDto>> UpdateGrupoEmpresa(GrupoEmpresaDto updateGrupoEmpresa)
         {
             // Llamar al método del repositorio para actualizar el grupo de empresa
@@ -116,5 +202,8 @@ namespace ApiEliteWebAcceso.Application.Services
 
             return Result<GrupoEmpresaDto>.Success(result);  
         }
+
+
+
     }
 }

@@ -1,18 +1,19 @@
 ﻿namespace ApiEliteWebAcceso.Application.DTOs.Empresa
 {
+
     public class EmpresaDto
     {
-        public int idEmpresaDTO { get; set; }
-
-        public string? nombreDTO { get; set; }
-
+        // Campos del DTO
+        public int? idEmpresaDTO { get; set; } // ID de la empresa (opcional)
+        public string? nombreDTO { get; set; } // Nombre de la empresa (opcional)
+        public int? grupoEmpresaDTO { get; set; } // FK al grupo de la empresa (opcional)
+        public string? idEmpresaC_DTO { get; set; } // ID de la empresa (opcional, char(20))
+        public string? logoDTO { get; set; } // Logo de la empresa (opcional, char(100))
+        public string? nombreBdDTO { get; set; } // Nombre de la base de datos (opcional, char(60))
+        public string? servidorBdDTO { get; set; } // Servidor de la base de datos (opcional, char(50))
+        public string? usuarioBdDTO { get; set; } // Usuario de la base de datos (opcional, char(50))
+        public string? passwordBdDTO { get; set; } // Contraseña de la base de datos (opcional, char(50))
+        public string? estadoDTO { get; set; } // Estado de la empresa (opcional, char(1))
         public string? cadenaConexionDTO { get; set; }
-
-        public string? logoDTO { get; set; }
-
-        public string? estadoDTO { get; set; }
-
-        public int grupoEmpresaDTO { get; set; }
-
     }
 }
