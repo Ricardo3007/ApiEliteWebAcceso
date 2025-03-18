@@ -157,9 +157,9 @@ public partial class AccesoContext : DbContext
 
         modelBuilder.Entity<ACC_PERMISO_EMPRESA>(entity =>
         {
-            entity.HasKey(e => e.PK_USUARIO_C).HasName("PK__ACC_PERM__D2ACAADA84F2E0E9");
+            entity.HasKey(e => e.PK_PERMISO_EMPRESA_C).HasName("PK__ACC_PERM__D2ACAADA84F2E0E9");
 
-            entity.Property(e => e.PK_USUARIO_C).ValueGeneratedNever();
+            entity.Property(e => e.PK_PERMISO_EMPRESA_C).ValueGeneratedNever();
             entity.Property(e => e.ESTADO_C)
                 .HasMaxLength(1)
                 .IsUnicode(false)
