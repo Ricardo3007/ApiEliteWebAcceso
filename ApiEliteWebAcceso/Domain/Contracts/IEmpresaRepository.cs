@@ -18,5 +18,12 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<bool> UpdateEmpresa(EmpresaDto updateEmpresa);
         Task<bool> DeleteEmpresa(int idEmpresa);
 
+        //permisos_empresas
+        Task<PermisoEmpresaDTO> CreatePermisoEmpresa(PermisoEmpresaDTO permisoEmpresa);
+        Task<bool> UpdatePermisoEmpresa(PermisoEmpresaDTO permisoEmpresa);
+        Task<List<ACC_PERMISO_EMPRESA>> GetPermisoEmpresa();
+        Task<ACC_PERMISO_EMPRESA> GetPermisoEmpresaID(int idPermisoEmpresa);
+        Task<bool> DeletePermisoEmpresa(int idPermisoEmpresa);
+
     }
 }

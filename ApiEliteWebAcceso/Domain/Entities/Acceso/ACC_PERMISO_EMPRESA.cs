@@ -5,7 +5,7 @@ namespace ApiEliteWebAcceso.Domain.Entities.Acceso;
 
 public partial class ACC_PERMISO_EMPRESA
 {
-    public int PK_USUARIO_C { get; set; }
+    public int PK_PERMISO_EMPRESA_C { get; set; }
 
     public int FK_APLICATIVO_C { get; set; }
 

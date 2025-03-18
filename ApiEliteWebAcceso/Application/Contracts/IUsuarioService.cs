@@ -1,0 +1,17 @@
+﻿using ApiEliteWebAcceso.Application.DTOs.Usuario;
+using ApiEliteWebAcceso.Application.Response;
+using ApiEliteWebAcceso.Domain.Entities.Acceso;
+
+namespace ApiEliteWebAcceso.Application.Contracts
+{
+    public interface IUsuarioService
+    {
+        Task<Result<List<UsuarioDto>>> GetUsuario();
+        Task<Result<UsuarioDto>> GetUsuarioID(int idUsuario, int idGrupoEmpresa);
+        Task<UsuarioDto> CreateUsuario(UsuarioDto createAplicativo);
+        Task<bool> UpdateUsuario(UsuarioDto updateAplicativo);
+        Task<bool> DeleteUsuario(int idUsuario);
+
+        Task<Result<List<UsuarioEmpresaPermisoDto>>> GetPermisoUsuarioEmpresaID(int idUsuario, int idGrupoEmpresa, bool isSuperAdmin);
+    }
+}

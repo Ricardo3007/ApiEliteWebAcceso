@@ -287,5 +287,139 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             return rowsAffected > 0;
         }
 
+        public async Task<PermisoEmpresaDTO> CreatePermisoEmpresa(PermisoEmpresaDTO createPermisoEmpresaDto)
+        {
+            // Crear la consulta SQL para insertar el nuevo registro
+            var sqlInsert = @"
+                            INSERT INTO [dbo].[ACC_PERMISO_EMPRESA]
+                               ([FK_APLICATIVO_C]
+                               ,[FK_EMPRESA_C]
+                               ,[ESTADO_C])
+                         VALUES
+                               (@FK_APLICATIVO_C
+                               ,@FK_EMPRESA_C
+                               ,@ESTADO_C);
+                            SELECT CAST(SCOPE_IDENTITY() as int);
+                        ";
+
+            // Crear los parámetros para la consulta
+            var parameters = new
+            {
+                FK_APLICATIVO_C = createPermisoEmpresaDto.IdAplicativoDTO,
+                FK_EMPRESA_C = createPermisoEmpresaDto.IdEmpresaDTO,
+                ESTADO_C = createPermisoEmpresaDto.EstadoDTO ?? string.Empty // Usar string.Empty si es nulo
+            };
+
+            // Ejecutar la consulta y obtener el ID del nuevo registro
+            var newId = await _dbConnection.ExecuteScalarAsync<int>(sqlInsert, parameters);
+
+            // Crear y devolver el nuevo objeto PermisoEmpresaDto
+            var newPermisoEmpresa = new PermisoEmpresaDTO
+            {
+                IdPermisoEmpresaDTO = newId,
+                IdAplicativoDTO = createPermisoEmpresaDto.IdAplicativoDTO,
+                IdEmpresaDTO = createPermisoEmpresaDto.IdEmpresaDTO,
+                EstadoDTO = createPermisoEmpresaDto.EstadoDTO ?? string.Empty
+            };
+
+            return newPermisoEmpresa;
+        }
+        public async Task<bool> UpdatePermisoEmpresa(PermisoEmpresaDTO updatePermisoEmpresaDto)
+        {
+            // Crear la consulta SQL para actualizar el registro
+            var sqlUpdate = @"
+                            UPDATE ACC_PERMISO_EMPRESA
+                            SET
+                                [FK_APLICATIVO_C] = @FK_APLICATIVO_C,
+                                [FK_EMPRESA_C] = @FK_EMPRESA_C,
+                                [ESTADO_C] = @ESTADO_C
+                            WHERE
+                                [PK_PERMISO_EMPRESA_C] = @PK_PERMISO_EMPRESA_C;
+                            ";
+
+            // Crear los parámetros para la consulta
+            var parameters = new
+            {
+                PK_PERMISO_EMPRESA_C = updatePermisoEmpresaDto.IdPermisoEmpresaDTO, // ID del registro a actualizar
+                FK_APLICATIVO_C = updatePermisoEmpresaDto.IdAplicativoDTO,
+                FK_EMPRESA_C = updatePermisoEmpresaDto.IdEmpresaDTO,
+                ESTADO_C = updatePermisoEmpresaDto.EstadoDTO ?? string.Empty // Usar string.Empty si es nulo
+            };
+
+            // Ejecutar la consulta de actualización
+            int rowsAffected = await _dbConnection.ExecuteAsync(sqlUpdate, parameters);
+
+            // Retornar el DTO actualizado
+            return rowsAffected > 0;
+        }
+
+        public async Task<List<ACC_PERMISO_EMPRESA>> GetPermisoEmpresa()
+        {
+            // Crear la consulta SQL para obtener todos los registros
+            var sqlQuery = @"
+                SELECT 
+                    [PK_PERMISO_EMPRESA_C],
+                    [FK_APLICATIVO_C],
+                    [FK_EMPRESA_C],
+                    [ESTADO_C]
+                FROM 
+                    [dbo].[ACC_PERMISO_EMPRESA];
+            ";
+
+            // Ejecutar la consulta y mapear los resultados a una lista de ACC_PERMISO_EMPRESA
+            var permisosEmpresa = await _dbConnection.QueryAsync<ACC_PERMISO_EMPRESA>(sqlQuery);
+
+            // Convertir el resultado a una lista y retornarla
+            return permisosEmpresa.ToList();
+        }
+
+        public async Task<ACC_PERMISO_EMPRESA> GetPermisoEmpresaID(int idPermisoEmpresa)
+        {
+            // Crear la consulta SQL para obtener el registro por ID
+            var sqlQuery = @"
+                    SELECT 
+                        [PK_PERMISO_EMPRESA_C],
+                        [FK_APLICATIVO_C],
+                        [FK_EMPRESA_C],
+                        [ESTADO_C]
+                    FROM 
+                        [dbo].[ACC_PERMISO_EMPRESA]
+                    WHERE
+                        [PK_PERMISO_EMPRESA_C] = @PK_PERMISO_EMPRESA_C;
+                ";
+
+            // Crear los parámetros para la consulta
+            var parameters = new
+            {
+                PK_PERMISO_EMPRESA_C = idPermisoEmpresa // ID del permiso de empresa a buscar
+            };
+
+            // Ejecutar la consulta y obtener el registro
+            var permisoEmpresa = await _dbConnection.QueryFirstOrDefaultAsync<ACC_PERMISO_EMPRESA>(sqlQuery, parameters);
+
+            // Retornar el registro encontrado (puede ser null si no se encuentra)
+            return permisoEmpresa;
+        }
+
+        public async Task<bool> DeletePermisoEmpresa(int idPermisoEmpresa)
+        {
+            // Crear la consulta SQL para eliminar el registro
+            var sqlDelete = @"
+                DELETE FROM [dbo].[ACC_PERMISO_EMPRESA]
+                WHERE [PK_PERMISO_EMPRESA_C] = @PK_PERMISO_EMPRESA_C;
+            ";
+
+            // Crear los parámetros para la consulta
+            var parameters = new
+            {
+                PK_PERMISO_EMPRESA_C = idPermisoEmpresa // ID del permiso de empresa a eliminar
+            };
+
+            // Ejecutar la consulta de eliminación
+            int rowsAffected = await _dbConnection.ExecuteAsync(sqlDelete, parameters);
+
+            // Retornar true si se eliminó al menos un registro, false en caso contrario
+            return rowsAffected > 0;
+        }
     }
 }
