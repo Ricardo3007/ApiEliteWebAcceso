@@ -80,7 +80,7 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
-        [HttpDelete("[action]")]
+        [HttpDelete("DeleteEmpresaID/{idEmpresa}")]
         public async Task<IActionResult> DeleteEmpresaID(int idEmpresa)
         {
             var result = await _empresaService.DeleteEmpresa(idEmpresa);

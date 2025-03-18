@@ -21,7 +21,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefatultConnec
 
 
 // Registrar IDbConnection en el contenedor de dependencias
-builder.Services.AddSingleton<IDbConnection>(provider => new SqlConnection(connectionString));
+//builder.Services.AddSingleton<IDbConnection>(provider => new SqlConnection(connectionString));
+builder.Services.AddTransient<IDbConnection>(provider => new SqlConnection(connectionString));
+
 
 // Registra el repositorio
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();

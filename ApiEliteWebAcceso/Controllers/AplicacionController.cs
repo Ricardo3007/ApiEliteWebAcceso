@@ -44,7 +44,7 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
-        [HttpDelete("[action]")]
+        [HttpDelete("DeleteAplicacion/{idAplicacion}")]
         public async Task<IActionResult> DeleteAplicacion(int idAplicacion)
         {
             var result = await _aplicativoService.DeleteAplicacion(idAplicacion);
