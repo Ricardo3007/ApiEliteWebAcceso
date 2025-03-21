@@ -16,4 +16,13 @@
         public string? estadoDTO { get; set; } // Estado de la empresa (opcional, char(1))
         public string? cadenaConexionDTO { get; set; }
     }
+
+    public class EmpresaPorGrupoDto
+    {
+        // Campos del DTO
+        public int? idEmpresaDTO { get; set; } // ID de la empresa (opcional)
+        public string? nombreDTO { get; set; } // Nombre de la empresa (opcional)
+        public int? idGrupoEmpresaDTO { get; set; } // FK al grupo de la empresa (opcional)
+        public string? nombreGrupoEmpresaDTO { get; set; } // Nombre de la empresa (opcional)
+    }
 }

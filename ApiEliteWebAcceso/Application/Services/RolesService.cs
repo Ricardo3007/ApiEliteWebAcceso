@@ -41,5 +41,17 @@ namespace ApiEliteWebAcceso.Application.Services
                 return Result<List<RolesDTO>>.Failure(ex.Message);
             }
         }
+
+        public async Task<Result<List<RolesOpcionMenu>>> GetRolOpcionesMenu(int idRol)
+        {
+            try
+            {
+                return Result<List<RolesOpcionMenu>>.Success(await _rolesRepository.GetRolOpcionesMenu(idRol));
+            }
+            catch (Exception ex)
+            {
+                return Result<List<RolesOpcionMenu>>.Failure(ex.Message);
+            }
+        }
     }
 }

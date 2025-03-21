@@ -203,7 +203,16 @@ namespace ApiEliteWebAcceso.Application.Services
             return Result<GrupoEmpresaDto>.Success(result);  
         }
 
-
-
+        public async Task<Result<List<EmpresaPorGrupoDto>>> GetEmpresaPorGrupo(int idGrupoEmpresa, bool isSuperAdmin)
+        {
+            try
+            {
+                return Result<List<EmpresaPorGrupoDto>>.Success(await _empresaRepository.GetEmpresaPorGrupo(idGrupoEmpresa, isSuperAdmin));
+           }
+            catch (Exception ex)
+            {
+                return Result<List<EmpresaPorGrupoDto>>.Failure(ex.Message);
+            }
+        }
     }
 }

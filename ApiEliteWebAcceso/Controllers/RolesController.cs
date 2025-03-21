@@ -23,5 +23,13 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
+        [HttpGet("[action]/{idRol}")]
+        public async Task<IActionResult> GetRolOpcionesMenu(int idRol)
+        {
+            var result = await _rolesService.GetRolOpcionesMenu(idRol);
+            return result.GetHttpResponse();
+        }
+        
+
     }
 }

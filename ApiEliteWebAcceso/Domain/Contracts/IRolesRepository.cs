@@ -1,4 +1,5 @@
-﻿using ApiEliteWebAcceso.Domain.Entities.Acceso;
+﻿using ApiEliteWebAcceso.Application.DTOs.Roles;
+using ApiEliteWebAcceso.Domain.Entities.Acceso;
 
 namespace ApiEliteWebAcceso.Domain.Contracts
 {
@@ -12,5 +13,6 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<bool> DeleteRol(int idRol);
 
         Task<List<ACC_ROLES_GRUPOEMPRESA>> GetRolGrupoEmpresa(int idGrupoEmpresa, bool isSuperAdmin);
+        Task<List<RolesOpcionMenu>> GetRolOpcionesMenu(int idRol);
     }
 }

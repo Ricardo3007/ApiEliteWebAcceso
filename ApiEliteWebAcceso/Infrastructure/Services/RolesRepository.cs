@@ -1,4 +1,6 @@
-﻿using ApiEliteWebAcceso.Domain.Contracts;
+﻿using ApiEliteWebAcceso.Application.DTOs.Empresa;
+using ApiEliteWebAcceso.Application.DTOs.Roles;
+using ApiEliteWebAcceso.Domain.Contracts;
 using ApiEliteWebAcceso.Domain.Entities.Acceso;
 using Dapper;
 using System.Data;
@@ -59,6 +61,34 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
 
             // Convertir el resultado a una lista y retornarla
             return permisoMenu.ToList();
+        }
+
+        public async Task<List<RolesOpcionMenu>> GetRolOpcionesMenu(int idRol)
+        {
+            var sqlQuery = @"
+                            SELECT MENU.PK_OPCION_MENU_C,MENU.PARENT_C,MENU.TEXT_C,
+                                    MENU.FK_APLICATIVO_C,APL.INICIALES_APLICATIVO_C,APL.ORDEN_C
+		                            FROM ACC_MENU_ELITE MENU  
+			                             INNER JOIN ACC_OPCIONES_ROL OPC ON OPC.FK_OPCION_MENU_C = MENU.PK_OPCION_MENU_C
+			                             INNER JOIN ACC_APLICACION	 APL ON APL.PK_APLICATIVO_C = MENU.FK_APLICATIVO_C  
+			                             WHERE OPC.FK_ROL_C = @FK_ROL_C AND MENU.ESTADO_C = 'A'
+			                             ORDER BY APL.ORDEN_C,APL.INICIALES_APLICATIVO_C";
+
+   
+
+            // Ejecutar la consulta y obtener el registro
+            var result = await _dbConnection.QueryAsync(sqlQuery,new { FK_ROL_C = idRol });
+
+            // Convertir el resultado a una lista y retornarla
+            return result.Select(e => new RolesOpcionMenu
+            {
+                OpcionMenuId = e.PK_OPCION_MENU_C,
+                ParentId = e.PARENT_C,
+                Texto = e.TEXT_C,
+                AplicativoId = e.FK_APLICATIVO_C,
+                InicialesAplicativo = e.INICIALES_APLICATIVO_C,
+                Orden = e.ORDEN_C
+            }).ToList();
         }
 
         public Task<bool> UpdateRol(ACC_ROLES updateAplicativo)

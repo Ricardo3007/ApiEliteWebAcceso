@@ -1,4 +1,5 @@
 ﻿using ApiEliteWebAcceso.Application.DTOs.Empresa;
+using ApiEliteWebAcceso.Application.DTOs.Usuario;
 using ApiEliteWebAcceso.Domain.Contracts;
 using ApiEliteWebAcceso.Domain.Entities.Acceso;
 using ApiEliteWebAcceso.Domain.Helpers.Enum;
@@ -420,6 +421,41 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
 
             // Retornar true si se eliminó al menos un registro, false en caso contrario
             return rowsAffected > 0;
+        }
+
+        public async Task<List<EmpresaPorGrupoDto>> GetEmpresaPorGrupo(int idGrupoEmpresa, bool isSuperAdmin)
+        {
+            var sqlQuery = @"
+                            SELECT 
+                                EMP.PK_EMPRESA_C, 
+                                EMP.NOMBRE_EMPRESA_C, 
+	                            GR.PK_GRUPO_EMPRESA_C,
+	                            GR.NOMBRE_GRUPO_C
+                            FROM ACC_EMPRESA EMP 
+		                            INNER JOIN ACC_GRUPO_EMPRESAS GR ON GR.PK_GRUPO_EMPRESA_C = EMP.FK_GRUPO_EMPRESA_C 
+                             WHERE EMP.ESTADO_C = 'A'
+                                     AND (@superAdmin = 1 OR EMP.FK_GRUPO_EMPRESA_C = @FK_GRUPO_EMPRESA_C) 
+                            ORDER BY EMP.NOMBRE_EMPRESA_C";
+
+            // Crear los parámetros para la consulta
+            var parameters = new
+            {
+                FK_GRUPO_EMPRESA_C = idGrupoEmpresa, // ID del permiso de empresa a buscar
+                superAdmin = isSuperAdmin
+            };
+
+            // Ejecutar la consulta y obtener el registro
+            var result = await _dbConnection.QueryAsync(sqlQuery, parameters);
+
+
+            // Retornar el registro encontrado (puede ser null si no se encuentra)
+            return result.Select(e => new EmpresaPorGrupoDto
+                    {
+                        idEmpresaDTO = e.PK_EMPRESA_C,
+                        nombreDTO = e.NOMBRE_EMPRESA_C,
+                        idGrupoEmpresaDTO = e.PK_GRUPO_EMPRESA_C,
+                        nombreGrupoEmpresaDTO = e.NOMBRE_GRUPO_C
+                    }).ToList();
         }
     }
 }

@@ -25,5 +25,7 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<ACC_PERMISO_EMPRESA> GetPermisoEmpresaID(int idPermisoEmpresa);
         Task<bool> DeletePermisoEmpresa(int idPermisoEmpresa);
 
+        Task<List<EmpresaPorGrupoDto>> GetEmpresaPorGrupo(int idGrupoEmpresa, bool isSuperAdmin);
+
     }
 }

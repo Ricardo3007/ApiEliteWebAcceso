@@ -87,6 +87,13 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
+        
+        [HttpGet("[action]/{idGrupoEmpresa}/{isSuperAdmin}")]
+        public async Task<IActionResult> GetEmpresaPorGrupo(int idGrupoEmpresa,bool isSuperAdmin)
+        {
+            var result = await _empresaService.GetEmpresaPorGrupo(idGrupoEmpresa,isSuperAdmin);
+            return result.GetHttpResponse();
+        }
 
     }
 }

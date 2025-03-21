@@ -2,6 +2,7 @@
 using ApiEliteWebAcceso.Application.DTOs.Menu;
 using ApiEliteWebAcceso.Application.Response;
 using ApiEliteWebAcceso.Domain.Entities.Acceso;
+using System.Threading.Tasks;
 
 namespace ApiEliteWebAcceso.Application.Contracts
 {
@@ -22,6 +23,8 @@ namespace ApiEliteWebAcceso.Application.Contracts
         Task<Result<EmpresaDto>> CreateEmpresa(EmpresaDto createEmpresa);
         Task<Result<bool>> UpdateEmpresa(EmpresaDto updateEmpresa);
         Task<Result<bool>> DeleteEmpresa(int idEmpresa);
+
+        Task<Result<List<EmpresaPorGrupoDto>>> GetEmpresaPorGrupo(int idGrupoEmpresa, bool isSuperAdmin);
 
     }
 }
