@@ -8,7 +8,7 @@ namespace ApiEliteWebAcceso.Application.Contracts
     {
         Task<Result<List<UsuarioDto>>> GetUsuario();
         Task<Result<UsuarioDto>> GetUsuarioID(int idUsuario, int idGrupoEmpresa);
-        Task<UsuarioDto> CreateUsuario(UsuarioDto createAplicativo);
+        Task<Result<UsuarioDto>> CreateUsuario(UsuarioDto usuarioDto);
         Task<bool> UpdateUsuario(UsuarioDto updateAplicativo);
         Task<bool> DeleteUsuario(int idUsuario);
 

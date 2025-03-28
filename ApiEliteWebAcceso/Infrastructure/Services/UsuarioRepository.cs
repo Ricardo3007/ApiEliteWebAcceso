@@ -3,6 +3,7 @@ using ApiEliteWebAcceso.Domain.Contracts;
 using ApiEliteWebAcceso.Domain.Entities.Acceso;
 using Dapper;
 using System.Data;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ApiEliteWebAcceso.Infrastructure.Services
 {
@@ -15,9 +16,63 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             _dbConnection = dbConnection;
         }
 
-        public Task<UsuarioDto> CreateUsuario(UsuarioDto createAplicativo)
+        public async Task<UsuarioDto> CreateUsuario(UsuarioDto createUsuario)
         {
-            throw new NotImplementedException();
+
+            using var transaction =  _dbConnection.BeginTransaction();
+
+            try
+            {
+                // Insertar usuario y obtener el ID generado
+                    string insertUsuario = @"
+                    INSERT INTO ACC_USUARIO ([USUARIO_C],[NOMBRE_USUARIO_C],[ID_USUARIO_C],[PASSWORD_C],[MAIL_USUARIO_C],[ESTADO_C],[TIPO_USUARIO_C])
+                    OUTPUT INSERTED.PK_USUARIO_C
+                    VALUES (@USUARIO_C, @NOMBRE_USUARIO_C,@ID_USUARIO_C, @PASSWORD_C, @MAIL_USUARIO_C,  @ESTADO_C,@TIPO_USUARIO_C)"
+                ;
+
+                var usuarioId = await _dbConnection.QuerySingleAsync<int>(insertUsuario, new ACC_USUARIO
+                {
+                    USUARIO_C = createUsuario.usuarioDTO,
+                    ID_USUARIO_C = createUsuario.documentoDTO,
+                    NOMBRE_USUARIO_C = createUsuario.nombreDTO,
+                    TIPO_USUARIO_C = createUsuario.tipoUsuarioDTO,
+                    MAIL_USUARIO_C = createUsuario.emailDTO,
+                    PASSWORD_C = createUsuario.passwordDTO,
+                    ESTADO_C = createUsuario.estadoDTO
+                }, transaction);
+
+
+                // Insertar permisos de usuario
+                if (createUsuario.Permisos != null && createUsuario.Permisos.Count > 0)
+                {
+                    string insertPermisos = @"
+                                INSERT INTO ACC_PERMISO_USUARIO (FK_USUARIO_C, FK_OPCION_MENU_C,FK_EMPRESA_C)
+                                VALUES (@UsuarioId, @OpcionMenuId,@fkempresa)";
+
+                    foreach (var permiso in createUsuario.Permisos)
+                    {
+                        await _dbConnection.ExecuteAsync(insertPermisos, new
+                        {
+                            UsuarioId = usuarioId,
+                            OpcionMenuId = permiso.FkOpcionMenuC,
+                            fkempresa = permiso.FkEmpresaC
+                        }, transaction);
+                    }
+                }
+
+                // Confirmar la transacción
+                transaction.Commit();
+
+                createUsuario.idUsuarioDTO = usuarioId;
+
+                return createUsuario;
+            }
+            catch (Exception)
+            {
+                // Revertir si hay error
+                 transaction.Rollback();
+                throw;
+            }
         }
 
         public Task<bool> DeleteUsuario(int idUsuario)
@@ -67,14 +122,37 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
         {
             // Crear la consulta SQL para obtener todos los registros
             var sqlQuery = @"
-                            SELECT PK_PERMISO_USUARIO_C,FK_USUARIO_C, FK_OPCION_MENU_C,MENU.DESCRIPCION_C,
-		                            FK_EMPRESA_C,EMP.NOMBRE_EMPRESA_C,EMP.FK_GRUPO_EMPRESA_C,APL.INICIALES_APLICATIVO_C,
-		                            APL.NOMBRE_APLICATIVO_C,APL.ORDEN_C
-                            FROM            ACC_PERMISO_USUARIO PERUSU
-				                            INNER JOIN ACC_MENU_ELITE MENU ON MENU.PK_OPCION_MENU_C = PERUSU.FK_OPCION_MENU_C 
-				                            INNER JOIN ACC_EMPRESA  EMP ON EMP.PK_EMPRESA_C = PERUSU.FK_EMPRESA_C 
-				                            INNER JOIN ACC_APLICACION APL ON APL.PK_APLICATIVO_C = MENU.FK_APLICATIVO_C 
-                            WHERE FK_USUARIO_C = @PK_USUARIO_C AND FK_GRUPO_EMPRESA_C = @FK_GRUPO_EMPRESA_C ";
+                            SELECT DISTINCT
+                                EMP.PK_EMPRESA_C, 
+                                EMP.NOMBRE_EMPRESA_C, 
+                                EMP.FK_GRUPO_EMPRESA_C, 
+                                APL.INICIALES_APLICATIVO_C, 
+                                APL.NOMBRE_APLICATIVO_C, 
+                                APL.ORDEN_C, 
+                                MENU.PK_OPCION_MENU_C, 
+                                MENU.DESCRIPCION_C, 
+                                MENU.URL_C, 
+                                MENU.ICONO_C, 
+                                MENU.ESTADO_C,
+	                            PU.PK_PERMISO_USUARIO_C,
+	                            PE.PK_PERMISO_EMPRESA_C,
+                                CASE 
+                                    WHEN PU.PK_PERMISO_USUARIO_C IS NOT NULL  THEN 1
+                                    ELSE 0 
+                                END AS PERMISO_C
+                            FROM ACC_EMPRESA EMP
+                            JOIN ACC_PERMISO_EMPRESA PE 
+                                ON EMP.PK_EMPRESA_C = PE.FK_EMPRESA_C
+                                AND EMP.FK_GRUPO_EMPRESA_C = @FK_GRUPO_EMPRESA_C
+                            JOIN ACC_APLICACION APL 
+                                ON PE.FK_APLICATIVO_C = APL.PK_APLICATIVO_C
+                            JOIN ACC_MENU_ELITE MENU 
+                                ON MENU.FK_APLICATIVO_C = APL.PK_APLICATIVO_C
+                            LEFT JOIN ACC_PERMISO_USUARIO PU 
+                                ON PU.FK_OPCION_MENU_C = MENU.PK_OPCION_MENU_C 
+                                AND PU.FK_USUARIO_C = @PK_USUARIO_C
+                                AND PU.FK_EMPRESA_C = EMP.PK_EMPRESA_C
+                            ORDER BY EMP.PK_EMPRESA_C, APL.ORDEN_C, MENU.PK_OPCION_MENU_C";
 
             // Crear los parámetros para la consulta
             var parameters = new

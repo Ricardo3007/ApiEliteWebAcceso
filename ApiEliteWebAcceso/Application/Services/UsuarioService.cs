@@ -1,9 +1,11 @@
 ﻿using ApiEliteWebAcceso.Application.Contracts;
+using ApiEliteWebAcceso.Application.DTOs.Aplicacion;
 using ApiEliteWebAcceso.Application.DTOs.Empresa;
 using ApiEliteWebAcceso.Application.DTOs.Usuario;
 using ApiEliteWebAcceso.Application.Response;
 using ApiEliteWebAcceso.Domain.Contracts;
 using ApiEliteWebAcceso.Infrastructure.Services;
+using BCryptNet = BCrypt.Net.BCrypt;
 
 namespace ApiEliteWebAcceso.Application.Services
 {
@@ -18,9 +20,28 @@ namespace ApiEliteWebAcceso.Application.Services
             _config = config;
             _usuarioRepository = usuarioRepository;
         }
-        public Task<UsuarioDto> CreateUsuario(UsuarioDto createAplicativo)
+        public async Task<Result<UsuarioDto>> CreateUsuario(UsuarioDto usuarioDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // Validaciones de datos obligatorios
+                if (string.IsNullOrWhiteSpace(usuarioDto.usuarioDTO)) throw new ArgumentException("El usuario es obligatorio");
+                if (string.IsNullOrWhiteSpace(usuarioDto.documentoDTO)) throw new ArgumentException("El documento es obligatorio");
+                if (string.IsNullOrWhiteSpace(usuarioDto.nombreDTO)) throw new ArgumentException("El nombre es obligatorio");
+                if (usuarioDto.tipoUsuarioDTO == null) throw new ArgumentException("El tipo de usuario es obligatorio");
+                if (string.IsNullOrWhiteSpace(usuarioDto.emailDTO)) throw new ArgumentException("El email es obligatorio");
+                if (string.IsNullOrWhiteSpace(usuarioDto.passwordDTO)) throw new ArgumentException("La contraseña es obligatoria");
+                if (string.IsNullOrWhiteSpace(usuarioDto.estadoDTO)) throw new ArgumentException("El estado es obligatorio");
+
+                usuarioDto.passwordDTO = BCryptNet.HashPassword(usuarioDto.passwordDTO);
+
+                return Result<UsuarioDto>.Success(await _usuarioRepository.CreateUsuario(usuarioDto));
+            }
+            catch (Exception ex)
+            {
+                return Result<UsuarioDto>.Failure(ex.Message);
+            }           
+
         }
 
         public Task<bool> DeleteUsuario(int idUsuario)
@@ -103,9 +124,22 @@ namespace ApiEliteWebAcceso.Application.Services
                     FkGrupoEmpresaC = p.FK_GRUPO_EMPRESA_C,
                     InicialesAplicativoC = p.INICIALES_APLICATIVO_C,
                     NombreAplicativoC = p.NOMBRE_APLICATIVO_C,
-                    OrdenAplicativoC = p.ORDEN_C
+                    OrdenAplicativoC = p.ORDEN_C,
+                    tienepermiso = p.PERMISO_C
+                    
                 })
                 .ToList();
+
+                var empresaUsu = await _usuarioRepository.GetPermisoUsuarioEmpresaID(idUsuario, idGrupoEmpresa, false);
+
+                var permisoEmpresaDTO = empresaUsu.Select(e => new UsuarioEmpresaPermisoDto
+                {
+                    EmpresaIdDTO = e.PK_EMPRESA_C,
+                    NombreEmpresaDTO = e.NOMBRE_EMPRESA_C,
+                    GrupoEmpresaIdDTO = e.PK_GRUPO_EMPRESA_C,
+                    NombreGrupoDTO = e.NOMBRE_GRUPO_C,
+                    TienePermisoDTO = e.TIENE_PERMISO
+                }).ToList();
 
                 var resultUsuario = new UsuarioDto
                 {
@@ -116,6 +150,8 @@ namespace ApiEliteWebAcceso.Application.Services
                     emailDTO = usuario.MAIL_USUARIO_C,
                     passwordDTO = usuario.PASSWORD_C,
                     tipoUsuarioDTO = usuario.TIPO_USUARIO_C,
+                    nombreTipoUsuarioDTO =  usuario.TIPO_USUARIO_C == 1 ? "Superadministrador" : usuario.TIPO_USUARIO_C == 2 ? "Administrador" : "Estandar",
+                    estadoDTO = usuario.ESTADO_C,
                     Permisos = permisosDto
                 };
 

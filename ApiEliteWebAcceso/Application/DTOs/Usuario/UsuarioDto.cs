@@ -15,6 +15,7 @@ namespace ApiEliteWebAcceso.Application.DTOs.Usuario
         public string? nombreDTO { get; set; }
 
         public int? tipoUsuarioDTO { get; set; }
+        public string? nombreTipoUsuarioDTO { get; set; }
 
         public string? emailDTO { get; set; }
 
@@ -38,5 +39,7 @@ namespace ApiEliteWebAcceso.Application.DTOs.Usuario
         public string? InicialesAplicativoC { get; set; } // APL.INICIALES_APLICATIVO_C
         public string? NombreAplicativoC { get; set; }    // APL.NOMBRE_APLICATIVO_C
         public int OrdenAplicativoC { get; set; }        // APL.ORDEN_C
+        public int tienepermiso { get; set; }        // APL.ORDEN_C
+        
     }
 }
