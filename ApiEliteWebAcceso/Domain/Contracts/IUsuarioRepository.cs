@@ -9,7 +9,7 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<List<ACC_USUARIO>> GetUsuario();
         Task<ACC_USUARIO> GetUsuarioID(int idUsuario);
         Task<List<ACC_PERMISO_USUARIO_DETALLE>> GetPermisoUsuarioID(int idUsuario,int idGrupoEmpresa);
-        Task<UsuarioDto> CreateUsuario(UsuarioDto createAplicativo);
+        Task<UsuarioDto> CreateUsuario(UsuarioDto createUsuario);
         Task<bool> UpdateUsuario(UsuarioDto updateAplicativo);
         Task<bool> DeleteUsuario(int idUsuario);
 

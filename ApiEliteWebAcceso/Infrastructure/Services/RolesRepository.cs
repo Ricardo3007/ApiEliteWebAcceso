@@ -72,14 +72,16 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
         {
             var sqlQuery = @"
                             SELECT MENU.PK_OPCION_MENU_C,MENU.PARENT_C,MENU.TEXT_C,
-                                    MENU.FK_APLICATIVO_C,APL.INICIALES_APLICATIVO_C,APL.ORDEN_C
+                                    MENU.FK_APLICATIVO_C,APL.INICIALES_APLICATIVO_C,APL.ORDEN_C,
+		                            CASE 
+			                            WHEN OPC.PK_OPCION_ROL_C IS NULL THEN 0 
+			                            ELSE 1 
+		                            END AS CHECK_C -- INDICA SI EL USUARIO TIENE EL PERMISO (1) O NO (0) 
 		                            FROM ACC_MENU_ELITE MENU  
-			                             INNER JOIN ACC_OPCIONES_ROL OPC ON OPC.FK_OPCION_MENU_C = MENU.PK_OPCION_MENU_C
-			                             INNER JOIN ACC_APLICACION	 APL ON APL.PK_APLICATIVO_C = MENU.FK_APLICATIVO_C  
-			                             WHERE OPC.FK_ROL_C = @FK_ROL_C AND MENU.ESTADO_C = 'A'
-			                             ORDER BY APL.ORDEN_C,APL.INICIALES_APLICATIVO_C";
-
-   
+			                                INNER JOIN ACC_APLICACION	APL ON APL.PK_APLICATIVO_C = MENU.FK_APLICATIVO_C  
+				                             LEFT JOIN ACC_OPCIONES_ROL OPC ON OPC.FK_OPCION_MENU_C = MENU.PK_OPCION_MENU_C AND OPC.FK_ROL_C = @FK_ROL_C
+			                                WHERE MENU.ESTADO_C = 'A'
+			                                ORDER BY APL.ORDEN_C,APL.INICIALES_APLICATIVO_C";
 
             // Ejecutar la consulta y obtener el registro
             var result = await _dbConnection.QueryAsync(sqlQuery,new { FK_ROL_C = idRol });
@@ -92,7 +94,8 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
                 Texto = e.TEXT_C,
                 AplicativoId = e.FK_APLICATIVO_C,
                 InicialesAplicativo = e.INICIALES_APLICATIVO_C,
-                Orden = e.ORDEN_C
+                Orden = e.ORDEN_C,
+                Check = e.CHECK_C
             }).ToList();
         }
 

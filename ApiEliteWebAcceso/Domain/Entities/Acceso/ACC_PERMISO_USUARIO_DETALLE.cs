@@ -16,6 +16,7 @@ namespace ApiEliteWebAcceso.Domain.Entities.Acceso
         public string? FK_ROL_C { get; set; } // APL.INICIALES_APLICATIVO_C
         public string? NOMBRE_ROL_C { get; set; }    // APL.NOMBRE_APLICATIVO_C
         public int ORDEN_C { get; set; }
+        public int PERMISO_C { get; set; }
     }
 
     public class ACC_PERMISO_USUARIO_EMPRESA

@@ -72,6 +72,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
+app.UseCors("CorsPolicy");
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -81,6 +84,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseCors("CorsPolicy");
 
 app.Run();

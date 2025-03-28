@@ -28,5 +28,6 @@
 
         // Propiedad para el orden de la opción en el menú
         public int Orden { get; set; }
+        public int Check { get; set; }
     }
 }
