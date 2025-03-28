@@ -78,5 +78,22 @@ namespace ApiEliteWebAcceso.Application.Services
                 return Result<List<MenuDto>>.Failure(ex.Message);
             }
         }
+
+
+        public async Task<Result<List<MenuNodeDto>>> GetMenuPermiso(int idGrupoEmpresa, int? idRol = null)
+        {
+
+            try
+            {
+                var menulist = await _menuRepository.GetMenuPermiso(idGrupoEmpresa, idRol);
+
+                return Result<List<MenuNodeDto>>.Success(menulist);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<MenuNodeDto>>.Failure(ex.Message);
+            }
+
+        }
     }
 }

@@ -6,6 +6,7 @@
         public string? NombreRolDTO { get; set; }
         public int? GrupoEmpresaIdDTO { get; set; }
         public string? NombreGrupoDTO { get; set; }
+        public string? EstadoDTO { get; set; }
     }
 
     public class RolesOpcionMenu

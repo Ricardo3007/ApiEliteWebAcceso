@@ -1,8 +1,10 @@
-﻿using ApiEliteWebAcceso.Application.DTOs.Empresa;
+﻿using ApiEliteWebAcceso.Application.DTOs.Aplicacion;
+using ApiEliteWebAcceso.Application.DTOs.Empresa;
 using ApiEliteWebAcceso.Application.DTOs.Roles;
 using ApiEliteWebAcceso.Domain.Contracts;
 using ApiEliteWebAcceso.Domain.Entities.Acceso;
 using Dapper;
+using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace ApiEliteWebAcceso.Infrastructure.Services
@@ -23,14 +25,17 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             throw new NotImplementedException();
         }
 
-        public Task<bool> DeleteRol(int idUsuario)
+        public async Task<List<ACC_ROLES>> GetRoles()
         {
-            throw new NotImplementedException();
-        }
+            string consulta = @"SELECT [PK_ROL_C]
+                                  ,[NOMBRE_ROL_C]
+                                  ,[FK_GRUPO_EMPRESA_C]
+                                  ,[ESTADO_C]
+                              FROM [Elite_Web].[dbo].[ACC_ROLES]";
 
-        public Task<List<ACC_ROLES>> GetRoles()
-        {
-            throw new NotImplementedException();
+            var result = await _dbConnection.QueryAsync<ACC_ROLES>(consulta);
+
+            return result.ToList();
         }
 
         public Task<ACC_ROLES> GetRolesID(int idRol)
@@ -95,5 +100,189 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
         {
             throw new NotImplementedException();
         }
+
+
+        public async Task<bool> CreateRolAsync(RolDTO rolDTO)
+        {
+
+            if (_dbConnection.State == ConnectionState.Closed)
+            {
+                _dbConnection.Open(); // Abrir la conexión si está cerrada
+            }
+
+            using (var transaction = _dbConnection.BeginTransaction())
+            {
+                try
+                {
+                    // Insertar el rol
+                    string insertRolQuery = @"
+                        INSERT INTO ACC_ROLES (NOMBRE_ROL_C, FK_GRUPO_EMPRESA_C, ESTADO_C)
+                        VALUES (@NombreRol, @GrupoEmpresaId, @Estado);
+                        SELECT CAST(SCOPE_IDENTITY() as int);";
+
+                    int rolId = await _dbConnection.ExecuteScalarAsync<int>(
+                        insertRolQuery,
+                        new
+                        {
+                            NombreRol = rolDTO.NombreRolDTO,
+                            GrupoEmpresaId = rolDTO.GrupoEmpresaIdDTO,
+                            Estado = rolDTO.EstadoDTO
+                        },
+                        transaction
+                    );
+
+                    // Insertar permisos
+                    string insertPermisosQuery = @"
+                        INSERT INTO ACC_OPCIONES_ROL (FK_OPCION_MENU_C, FK_ROL_C)
+                        VALUES (@OpcionMenuId, @RolId);";
+
+                    foreach (var permiso in rolDTO.Permisos)
+                    {
+                        await _dbConnection.ExecuteAsync(
+                            insertPermisosQuery,
+                            new { OpcionMenuId = permiso, RolId = rolId },
+                            transaction
+                        );
+                    }
+
+                    transaction.Commit();
+                    return true;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    return false;
+                }
+            }
+        }
+
+
+
+
+        public async Task<bool> UpdateRol(RolDTO rolDTO)
+        {
+            if (_dbConnection.State == ConnectionState.Closed)
+            {
+                _dbConnection.Open(); // Abrir la conexión si está cerrada
+            }
+
+            using (var transaction = _dbConnection.BeginTransaction())
+            {
+                try
+                {
+                    // 1. Actualizar el rol
+                    string updateRolQuery = @"
+                        UPDATE ACC_ROLES 
+                        SET NOMBRE_ROL_C = @NombreRol, 
+                            FK_GRUPO_EMPRESA_C = @GrupoEmpresaId, 
+                            ESTADO_C = @Estado
+                        WHERE PK_ROL_C = @RolId;";
+
+                    await _dbConnection.ExecuteAsync(
+                        updateRolQuery,
+                        new
+                        {
+                            RolId = rolDTO.IdRolDTO, // Asegúrate de que este ID venga en el DTO
+                            NombreRol = rolDTO.NombreRolDTO,
+                            GrupoEmpresaId = rolDTO.GrupoEmpresaIdDTO,
+                            Estado = rolDTO.EstadoDTO
+                        },
+                        transaction
+                    );
+
+                    // 2. Eliminar los permisos existentes del rol
+                    string deletePermisosQuery = @"
+                        DELETE FROM ACC_OPCIONES_ROL 
+                        WHERE FK_ROL_C = @RolId;";
+
+                    await _dbConnection.ExecuteAsync(
+                        deletePermisosQuery,
+                        new { RolId = rolDTO.IdRolDTO },
+                        transaction
+                    );
+
+                    // 3. Insertar los nuevos permisos
+                    string insertPermisosQuery = @"
+                        INSERT INTO ACC_OPCIONES_ROL (FK_OPCION_MENU_C, FK_ROL_C)
+                        VALUES (@OpcionMenuId, @RolId);";
+
+                    foreach (var permiso in rolDTO.Permisos)
+                    {
+                        await _dbConnection.ExecuteAsync(
+                            insertPermisosQuery,
+                            new { OpcionMenuId = permiso, RolId = rolDTO.IdRolDTO },
+                            transaction
+                        );
+                    }
+
+                    transaction.Commit();
+                    return true;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    return false;
+                }
+            }
+        }
+
+
+
+        public async Task<bool> DeleteRol(int idRol)
+        {
+            if (idRol <= 0)
+            {
+                throw new ArgumentException("El ID del rol debe ser un valor entero positivo.");
+            }
+
+            if (_dbConnection.State == ConnectionState.Closed)
+            {
+                _dbConnection.Open(); // Abrir la conexión si está cerrada
+            }
+
+            using (var transaction = _dbConnection.BeginTransaction())
+            {
+                try
+                {
+                    // Eliminar las opciones del rol
+                    var sqlDeleteOpc = @"
+                        DELETE FROM ACC_OPCIONES_ROL
+                        WHERE FK_ROL_C = @FK_ROL_C;
+                    ";
+                    var parametersOpc = new { FK_ROL_C = idRol };
+                    var rowsOpcDeleted = await _dbConnection.ExecuteAsync(sqlDeleteOpc, parametersOpc, transaction);
+
+                    // Eliminar el rol
+                    var sqlDelete = @"
+                        DELETE FROM ACC_ROLES
+                        WHERE PK_ROL_C = @PK_ROL_C;
+                    ";
+                    var parameters = new { PK_ROL_C = idRol };
+                    var rowsRolDeleted = await _dbConnection.ExecuteAsync(sqlDelete, parameters, transaction);
+
+                    // Confirmar la transacción solo si ambas eliminaciones son exitosas
+                    if (rowsRolDeleted > 0 || rowsOpcDeleted > 0)
+                    {
+                        transaction.Commit();
+                        return true;
+                    }
+                    else
+                    {
+                        transaction.Rollback();
+                        return false;
+                    }
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+
+
+
+
     }
 }

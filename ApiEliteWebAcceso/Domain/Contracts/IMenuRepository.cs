@@ -7,5 +7,6 @@ namespace ApiEliteWebAcceso.Domain.Contracts
     public interface IMenuRepository
     {
         Task<List<MenuOption>> ObtenerMenuUsuarioRolEmpresa(int idUsuario, int idEmpresa);
+        Task<List<MenuNodeDto>> GetMenuPermiso(int idGrupoEmpresa, int? idRol = null);
     }
 }

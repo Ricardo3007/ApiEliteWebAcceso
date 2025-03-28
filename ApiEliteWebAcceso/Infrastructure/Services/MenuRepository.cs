@@ -17,6 +17,7 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             _dbConnection = dbConnection;
         }
 
+
         public async Task<List<MenuOption>>  ObtenerMenuUsuarioRolEmpresa(int idUsuario, int idEmpresa)
         {
             string consulta = @"
@@ -80,5 +81,55 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
 
             return result.ToList();
         }
+
+        public async Task<List<MenuNodeDto>> GetMenuPermiso(int idGrupoEmpresa, int? idRol = null)
+        {
+            string queryMenu = @"
+                    SELECT DISTINCT 
+                        ame.PK_OPCION_MENU_C AS Id,
+                        ame.TEXT_C AS Text,
+                        ame.URL_C AS Url,
+                        ame.PARENT_C AS ParentId
+                    FROM ACC_MENU_ELITE ame
+                    INNER JOIN ACC_PERMISO_EMPRESA ape ON ape.FK_APLICATIVO_C = ame.FK_APLICATIVO_C
+                    INNER JOIN ACC_EMPRESA ae ON ae.PK_EMPRESA_C = ape.FK_EMPRESA_C
+                    WHERE ae.FK_GRUPO_EMPRESA_C = @IdGrupoEmpresa
+                    AND ame.ESTADO_C = 'A' 
+                    AND ape.ESTADO_C = 'A'";
+
+            var menuItems = (await _dbConnection.QueryAsync<MenuNodeDto>(queryMenu, new { IdGrupoEmpresa = idGrupoEmpresa })).ToList();
+            HashSet<int> roleOptions = new();
+
+            if (idRol.HasValue)
+            {
+                string queryRoles = @"
+                        SELECT FK_OPCION_MENU_C
+                        FROM ACC_OPCIONES_ROL
+                        WHERE FK_ROL_C = @IdRol";
+
+                roleOptions = (await _dbConnection.QueryAsync<int>(queryRoles, new { IdRol = idRol })).ToHashSet();
+            }
+
+            // Construcción del árbol con la nueva propiedad checked
+            var menuDictionary = menuItems.ToDictionary(m => m.Id, m => m);
+            List<MenuNodeDto> rootNodes = new();
+
+            foreach (var menuItem in menuItems)
+            {
+                menuItem.Checked = idRol.HasValue ? roleOptions.Contains(menuItem.Id) : false;
+
+                if (menuItem.ParentId == null)
+                {
+                    rootNodes.Add(menuItem);
+                }
+                else if (menuDictionary.ContainsKey(menuItem.ParentId.Value))
+                {
+                    menuDictionary[menuItem.ParentId.Value].Children.Add(menuItem);
+                }
+            }
+
+            return rootNodes;
+        }
+
     }
 }
