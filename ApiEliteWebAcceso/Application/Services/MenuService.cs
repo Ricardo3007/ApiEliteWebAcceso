@@ -150,5 +150,19 @@ namespace ApiEliteWebAcceso.Application.Services
                 return Result<List<MenuPrincipalDTO>>.Failure(ex.Message);
             }
         }
+
+        public async Task<Result<MenuPrincipalDTO>> GetMenuID(int idMenu)
+        {
+            try
+            {
+                var menuId = await _menuRepository.GetMenuID(idMenu);
+
+                return Result<MenuPrincipalDTO>.Success(menuId);
+            }
+            catch (Exception ex)
+            {
+                return Result<MenuPrincipalDTO>.Failure(ex.Message);
+            }
+        }
     }
 }

@@ -174,5 +174,28 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
 
             return result.ToList();
         }
+
+        public async Task<MenuPrincipalDTO> GetMenuID(int idMenu)
+        {
+            string consulta = @"
+                                SELECT  
+                                    M.PK_OPCION_MENU_C       AS IdDTO,
+                                    M.FK_APLICATIVO_C        AS AplicativoIdDTO,
+                                    M.URL_C                  AS UrlDTO,
+                                    M.PARENT_C               AS ParentIdDTO,
+                                    P.TEXT_C                 AS NombreParentDTO,  -- Nombre del menú padre
+                                    M.TEXT_C                 AS TextoDTO,
+                                    M.DESCRIPCION_C          AS DescripcionDTO,
+                                    M.ICONO_C                AS IconoDTO,
+                                    M.ESTADO_C               AS EstadoDTO
+                                FROM ACC_MENU_ELITE M
+                                LEFT JOIN ACC_MENU_ELITE P ON M.PARENT_C = P.PK_OPCION_MENU_C
+                                where  M.PK_OPCION_MENU_C = @idOpcion";
+
+            var result = await _dbConnection.QueryFirstOrDefaultAsync<MenuPrincipalDTO>(consulta, new { idOpcion = idMenu });
+
+            return result;
+
+        }
     }
 }
