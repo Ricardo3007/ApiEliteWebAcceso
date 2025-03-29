@@ -149,5 +149,30 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             return result.ToList();
 
         }
+
+        public async Task<List<MenuPrincipalDTO>> GetMenu()
+        {
+            string consulta = @"
+                               SELECT 
+                                    M.PK_OPCION_MENU_C       AS IdDTO,
+                                    M.FK_APLICATIVO_C        AS AplicativoIdDTO,
+                                    M.URL_C                  AS UrlDTO,
+                                    M.PARENT_C               AS ParentIdDTO,
+                                    P.TEXT_C                 AS NombreParentDTO,  -- Nombre del menú padre
+                                    M.TEXT_C                 AS TextoDTO,
+                                    M.DESCRIPCION_C          AS DescripcionDTO,
+                                    M.ICONO_C                AS IconoDTO,
+                                    M.ESTADO_C               AS EstadoDTO
+                                FROM ACC_MENU_ELITE M
+                                LEFT JOIN ACC_MENU_ELITE P ON M.PARENT_C = P.PK_OPCION_MENU_C
+                                ORDER BY 
+                                    CASE WHEN M.PARENT_C IS NULL THEN M.PK_OPCION_MENU_C ELSE M.PARENT_C END, -- Padres primero
+                                    M.PARENT_C ASC,  -- Luego los hijos
+                                    M.PK_OPCION_MENU_C ASC  -- Orden natural dentro del mismo nivel";
+
+            var result = await _dbConnection.QueryAsync<MenuPrincipalDTO>(consulta);
+
+            return result.ToList();
+        }
     }
 }

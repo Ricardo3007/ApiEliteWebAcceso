@@ -18,4 +18,5 @@
         public string? ParentNombre { get; set; }
         public string Tipo { get; set; } = string.Empty;
     }
+
 }

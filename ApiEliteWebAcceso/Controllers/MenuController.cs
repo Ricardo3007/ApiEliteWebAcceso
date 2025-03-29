@@ -36,5 +36,12 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetMenu()
+        {
+            var result = await _menuService.GetMenu();
+            return result.GetHttpResponse();
+        }
+
     }
 }

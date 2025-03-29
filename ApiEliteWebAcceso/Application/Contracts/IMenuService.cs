@@ -10,6 +10,7 @@ namespace ApiEliteWebAcceso.Application.Contracts
         Task<Result<List<MenuDto>>> GetMenuUsuario(int idUsuario, int idEmpresa);
         Task<Result<List<MenuNodeDto>>> GetMenuPermiso(int idGrupoEmpresa, int? idRol = null);
         Task<Result<List<MenuPadreDTO>>> GetMenuPadre(int idAplicativo);
-
+        Task<Result<List<MenuPrincipalDTO>>> GetMenu();
+        
     }
 }

@@ -137,5 +137,18 @@ namespace ApiEliteWebAcceso.Application.Services
             }
         }
 
+        public async Task<Result<List<MenuPrincipalDTO>>> GetMenu()
+        {
+            try
+            {
+                var menulist = await _menuRepository.GetMenu();
+
+                return Result<List<MenuPrincipalDTO>>.Success(menulist);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<MenuPrincipalDTO>>.Failure(ex.Message);
+            }
+        }
     }
 }
