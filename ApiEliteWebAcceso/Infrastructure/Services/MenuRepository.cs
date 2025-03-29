@@ -131,5 +131,23 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             return rootNodes;
         }
 
+        public async Task<List<MenuOption>> GetMenuPadre(int idAplicativo)
+        {
+
+
+
+            string consulta = @"
+                                SELECT  [PK_OPCION_MENU_C]
+                                              ,[TEXT_C]
+                                              ,[DESCRIPCION_C]
+                                              ,[ICONO_C]
+                                FROM ACC_MENU_ELITE 
+                                WHERE PARENT_C IS NULL AND FK_APLICATIVO_C = @fkaplicativo and ESTADO_C = @Estado";
+
+            var result = await _dbConnection.QueryAsync<MenuOption>(consulta, new { fkaplicativo = idAplicativo,Estado = EstadoGeneralEnum.ACTIVO });
+
+            return result.ToList();
+
+        }
     }
 }

@@ -95,5 +95,47 @@ namespace ApiEliteWebAcceso.Application.Services
             }
 
         }
+
+        public async Task<Result<List<MenuPadreDTO>>> GetMenuPadre(int idAplicativo)
+        {
+            try
+            {
+                // Obtener la lista de opciones de menú desde el repositorio
+                var menuPadre = await _menuRepository.GetMenuPadre(idAplicativo);
+
+                // Verificar si hay datos
+                if (menuPadre == null || !menuPadre.Any())
+                {
+                    return Result<List<MenuPadreDTO>>.Failure("No se encontraron menús para el aplicativo.");
+                }
+
+                // Convertir las entidades a DTOs
+                var menuPadreDtoList = menuPadre.Select(menu => new MenuPadreDTO
+                {
+                    Id = menu.PK_Opcion_Menu_C,
+                    AplicativoId = menu.FK_Aplicativo_C,
+                    Url = menu.Url_C,
+                    ParentId = menu.Parent_C,
+                    Texto = menu.Text_C,
+                    Descripcion = menu.Descripcion_C,
+                    Icono = menu.Icono_C,
+                    Estado = menu.Estado_C,
+                    InicialesAplicativo = menu.Iniciales_Aplicativo_C,
+                    NombreAplicativo = menu.Nombre_Aplicativo_C,
+                    Nivel = menu.Nivel,
+                    Jerarquia = menu.Jerarquia,
+                    ParentNombre = menu.ParentName,
+                    Tipo = menu.Tipo_C
+                }).ToList();
+
+                // Retornar la lista con éxito
+                return Result<List<MenuPadreDTO>>.Success(menuPadreDtoList);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<MenuPadreDTO>>.Failure($"Error al obtener el menú padre: {ex.Message}");
+            }
+        }
+
     }
 }

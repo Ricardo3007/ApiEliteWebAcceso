@@ -29,5 +29,12 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
+        [HttpGet("[action]/{idAplicativo}")]
+        public async Task<IActionResult> GetMenuPadre(int idAplicativo)
+        {
+            var result = await _menuService.GetMenuPadre(idAplicativo);
+            return result.GetHttpResponse();
+        }
+
     }
 }
