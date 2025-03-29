@@ -164,5 +164,41 @@ namespace ApiEliteWebAcceso.Application.Services
                 return Result<MenuPrincipalDTO>.Failure(ex.Message);
             }
         }
+
+        public async Task<Result<bool>> CreateMenu(MenuPrincipalDTO menu)
+        {
+            try
+            {
+                return Result<bool>.Success(await _menuRepository.CreateMenu(menu));
+            }
+            catch (Exception ex)
+            {
+                return Result<bool>.Failure(ex.Message);
+            }
+        }
+
+        public async Task<Result<bool>> UpdateMenu(MenuPrincipalDTO menu)
+        {
+            try
+            {
+                return Result<bool>.Success(await _menuRepository.UpdateMenu(menu));
+            }
+            catch (Exception ex)
+            {
+                return Result<bool>.Failure(ex.Message);
+            }
+        }
+
+        public async Task<Result<bool>> DeleteMenu(int idMenu)
+        {
+            try
+            {
+                return Result<bool>.Success(await _menuRepository.DeleteMenu(idMenu));
+            }
+            catch (Exception ex)
+            {
+                return Result<bool>.Failure(ex.Message);
+            }
+        }
     }
 }

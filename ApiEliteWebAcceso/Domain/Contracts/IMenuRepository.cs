@@ -1,6 +1,7 @@
 ﻿using ApiEliteWebAcceso.Application.DTOs.Menu;
 using ApiEliteWebAcceso.Application.Response;
 using ApiEliteWebAcceso.Domain.Entities.Acceso;
+using System.Threading.Tasks;
 
 namespace ApiEliteWebAcceso.Domain.Contracts
 {
@@ -11,5 +12,9 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<List<MenuOption>> GetMenuPadre(int idAplicativo);
         Task<List<MenuPrincipalDTO>> GetMenu();
         Task<MenuPrincipalDTO> GetMenuID(int idMenu);
+
+        Task<bool> CreateMenu(MenuPrincipalDTO menu);
+        Task<bool> UpdateMenu(MenuPrincipalDTO menu);
+        Task<bool> DeleteMenu(int idMenu);
     }
 }

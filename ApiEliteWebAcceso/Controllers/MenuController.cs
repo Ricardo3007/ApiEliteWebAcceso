@@ -1,5 +1,8 @@
 ﻿using ApiEliteWebAcceso.Application.Contracts;
+using ApiEliteWebAcceso.Application.DTOs.Empresa;
+using ApiEliteWebAcceso.Application.DTOs.Menu;
 using ApiEliteWebAcceso.Application.Response;
+using ApiEliteWebAcceso.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiEliteWebAcceso.Controllers
@@ -47,6 +50,27 @@ namespace ApiEliteWebAcceso.Controllers
         public async Task<IActionResult> GetMenuID(int idMenu)
         {
             var result = await _menuService.GetMenuID(idMenu);
+            return result.GetHttpResponse();
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreateMenu([FromBody] MenuPrincipalDTO menu)
+        {
+            var result = await _menuService.CreateMenu(menu);
+            return result.GetHttpResponse();
+        }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateMenu([FromBody] MenuPrincipalDTO menu)
+        {
+            var result = await _menuService.UpdateMenu(menu);
+            return result.GetHttpResponse();
+        }
+
+        [HttpDelete("[action]/{idMenu}")]
+        public async Task<IActionResult> DeleteMenu(int idMenu)
+        {
+            var result = await _menuService.DeleteMenu(idMenu);
             return result.GetHttpResponse();
         }
 

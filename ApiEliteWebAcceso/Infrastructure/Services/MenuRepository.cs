@@ -4,6 +4,7 @@ using ApiEliteWebAcceso.Domain.Contracts;
 using ApiEliteWebAcceso.Domain.Entities.Acceso;
 using ApiEliteWebAcceso.Domain.Helpers.Enum;
 using Dapper;
+using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace ApiEliteWebAcceso.Infrastructure.Services
@@ -196,6 +197,69 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
 
             return result;
 
+        }
+
+        public async Task<bool> CreateMenu(MenuPrincipalDTO menu)
+        {
+            string query = @"
+                                    INSERT INTO ACC_MENU_ELITE 
+                                    ( FK_APLICATIVO_C, URL_C, PARENT_C, TEXT_C, 
+                                     DESCRIPCION_C, ICONO_C, ESTADO_C) 
+                                    VALUES 
+                                    ( @AplicativoId, @Url, @ParentId, @Texto, 
+                                     @Descripcion, @Icono, @Estado);";
+
+            var result = await _dbConnection.ExecuteAsync(query, new
+            {
+                AplicativoId = menu.AplicativoIdDTO,
+                Url = menu.UrlDTO,
+                ParentId = menu.ParentIdDTO,
+                Texto = menu.TextoDTO,
+                Descripcion = menu.DescripcionDTO,
+                Icono = menu.IconoDTO,
+                Estado = menu.EstadoDTO,
+            });
+
+            return result > 0;  // Retorna true si se insertó correctamente
+        }
+
+
+        public async Task<bool> UpdateMenu(MenuPrincipalDTO menu)
+        {
+            string query = @"
+                    UPDATE ACC_MENU_ELITE 
+                    SET 
+                        FK_APLICATIVO_C = @AplicativoId,
+                        URL_C = @Url,
+                        PARENT_C = @ParentId,
+                        TEXT_C = @Texto,
+                        DESCRIPCION_C = @Descripcion,
+                        ICONO_C = @Icono,
+                        ESTADO_C = @Estado
+                    WHERE PK_OPCION_MENU_C = @Id;";
+
+            var result = await _dbConnection.ExecuteAsync(query, new
+            {
+                Id = menu.IdDTO,  // Clave primaria del menú
+                AplicativoId = menu.AplicativoIdDTO,
+                Url = menu.UrlDTO,
+                ParentId = menu.ParentIdDTO,
+                Texto = menu.TextoDTO,
+                Descripcion = menu.DescripcionDTO,
+                Icono = menu.IconoDTO,
+                Estado = menu.EstadoDTO
+            });
+
+            return result > 0;  // Retorna true si se actualizó correctamente
+        }
+
+        public async Task<bool> DeleteMenu(int idMenu)
+        {
+            string query = @"DELETE FROM ACC_MENU_ELITE WHERE PK_OPCION_MENU_C = @Id;";
+
+            var result = await _dbConnection.ExecuteAsync(query, new { Id = idMenu });
+
+            return result > 0;  // Retorna true si se eliminó correctamente
         }
     }
 }
