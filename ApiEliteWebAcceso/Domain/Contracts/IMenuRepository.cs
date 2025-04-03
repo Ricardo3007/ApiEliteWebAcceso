@@ -16,5 +16,7 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<bool> CreateMenu(MenuPrincipalDTO menu);
         Task<bool> UpdateMenu(MenuPrincipalDTO menu);
         Task<bool> DeleteMenu(int idMenu);
+        Task<List<MenuNodeDto>> GetMenuUsuarioEmpresa(int idEmpresa, int? idRol = null);
+
     }
 }

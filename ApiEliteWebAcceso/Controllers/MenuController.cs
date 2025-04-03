@@ -74,5 +74,12 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
+        [HttpGet("[action]/{idEmpresa}")]
+        public async Task<IActionResult> GetMenuUsuarioEmpresa(int idEmpresa, int? idRol = null)
+        {
+            var result = await _menuService.GetMenuUsuarioEmpresa(idEmpresa, idRol);
+            return result.GetHttpResponse();
+        }
+
     }
 }

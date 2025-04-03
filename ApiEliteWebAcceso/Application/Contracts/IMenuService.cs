@@ -12,10 +12,11 @@ namespace ApiEliteWebAcceso.Application.Contracts
         Task<Result<List<MenuPadreDTO>>> GetMenuPadre(int idAplicativo);
         Task<Result<List<MenuPrincipalDTO>>> GetMenu();
         Task<Result<MenuPrincipalDTO>> GetMenuID(int idMenu);
-
         Task<Result<bool>> CreateMenu(MenuPrincipalDTO menu);
         Task<Result<bool>> UpdateMenu(MenuPrincipalDTO menu);
         Task<Result<bool>> DeleteMenu(int idMenu);
+        Task<Result<List<MenuNodeDto>>> GetMenuUsuarioEmpresa(int idEmpresa, int? idRol = null);
+
 
     }
 }

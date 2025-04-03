@@ -200,5 +200,21 @@ namespace ApiEliteWebAcceso.Application.Services
                 return Result<bool>.Failure(ex.Message);
             }
         }
+
+        public async Task<Result<List<MenuNodeDto>>> GetMenuUsuarioEmpresa(int idEmpresa, int? idRol = null)
+        {
+
+            try
+            {
+                var menulist = await _menuRepository.GetMenuUsuarioEmpresa(idEmpresa, idRol);
+
+                return Result<List<MenuNodeDto>>.Success(menulist);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<MenuNodeDto>>.Failure(ex.Message);
+            }
+
+        }
     }
 }
