@@ -2,6 +2,7 @@
 using ApiEliteWebAcceso.Domain.Contracts;
 using ApiEliteWebAcceso.Domain.Entities.Acceso;
 using Dapper;
+using Microsoft.Data.SqlClient;
 using System.Data;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
@@ -16,62 +17,80 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             _dbConnection = dbConnection;
         }
 
-        public async Task<UsuarioDto> CreateUsuario(UsuarioDto createUsuario)
+        public async Task<int> CreateUsuario(UsuarioInsertDto usuarioInsertDto)
         {
+            if (_dbConnection.State != ConnectionState.Open)
+            {
+                _dbConnection.Open();
+            }
 
-            using var transaction =  _dbConnection.BeginTransaction();
+            using var transaction = _dbConnection.BeginTransaction();
 
             try
             {
-                // Insertar usuario y obtener el ID generado
-                    string insertUsuario = @"
-                    INSERT INTO ACC_USUARIO ([USUARIO_C],[NOMBRE_USUARIO_C],[ID_USUARIO_C],[PASSWORD_C],[MAIL_USUARIO_C],[ESTADO_C],[TIPO_USUARIO_C])
-                    OUTPUT INSERTED.PK_USUARIO_C
-                    VALUES (@USUARIO_C, @NOMBRE_USUARIO_C,@ID_USUARIO_C, @PASSWORD_C, @MAIL_USUARIO_C,  @ESTADO_C,@TIPO_USUARIO_C)"
-                ;
+                // 1. Insertar el usuario en ACC_USUARIO
+                var sqlInsertUsuario = @"
+                                    INSERT INTO [dbo].[ACC_USUARIO]
+                                        ([USUARIO_C],
+                                         [NOMBRE_USUARIO_C],
+                                         [FK_TDI_C],
+                                         [ID_USUARIO_C],
+                                         [PASSWORD_C],
+                                         [MAIL_USUARIO_C],
+                                         [ESTADO_C],
+                                         [TIPO_USUARIO_C])
+                                    VALUES
+                                        (@Usuario,
+                                         @Nombre,
+                                         1,   
+                                         @Documento,
+                                         @Password,
+                                         @Email,
+                                         @Estado,
+                                         @TipoUsuario);
+                                    SELECT CAST(SCOPE_IDENTITY() as int);";
 
-                var usuarioId = await _dbConnection.QuerySingleAsync<int>(insertUsuario, new ACC_USUARIO
+                var usuarioId = await _dbConnection.ExecuteScalarAsync<int>(sqlInsertUsuario, new
                 {
-                    USUARIO_C = createUsuario.usuarioDTO,
-                    ID_USUARIO_C = createUsuario.documentoDTO,
-                    NOMBRE_USUARIO_C = createUsuario.nombreDTO,
-                    TIPO_USUARIO_C = createUsuario.tipoUsuarioDTO,
-                    MAIL_USUARIO_C = createUsuario.emailDTO,
-                    PASSWORD_C = createUsuario.passwordDTO,
-                    ESTADO_C = createUsuario.estadoDTO
+                    usuarioInsertDto.Usuario,
+                    usuarioInsertDto.Documento,
+                    usuarioInsertDto.Nombre,
+                    usuarioInsertDto.TipoUsuario,
+                    usuarioInsertDto.Email,
+                    Password = usuarioInsertDto.HashPassword(), // Password hasheado
+                    usuarioInsertDto.Estado,
+                    usuarioInsertDto.IdEmpresa,
+                    usuarioInsertDto.IdRol
                 }, transaction);
 
-
-                // Insertar permisos de usuario
-                if (createUsuario.Permisos != null && createUsuario.Permisos.Count > 0)
+                // 2. Insertar los permisos en ACC_PERMISO_USUARIO
+                if (usuarioInsertDto.Permisos?.Count > 0)
                 {
-                    string insertPermisos = @"
-                                INSERT INTO ACC_PERMISO_USUARIO (FK_USUARIO_C, FK_OPCION_MENU_C,FK_EMPRESA_C)
-                                VALUES (@UsuarioId, @OpcionMenuId,@fkempresa)";
+                    var sqlInsertPermisos = @"
+                INSERT INTO [dbo].[ACC_PERMISO_USUARIO]
+                    (FK_USUARIO_C, FK_OPCION_MENU_C, FK_EMPRESA_C,FK_ROL_C)
+                VALUES
+                    (@UsuarioId, @PermisoId, @EmpresaId,@RolId);";
 
-                    foreach (var permiso in createUsuario.Permisos)
+                    // Insertar todos los permisos en un solo comando
+                    var permisosParams = usuarioInsertDto.Permisos.Select(permisoId => new
                     {
-                        await _dbConnection.ExecuteAsync(insertPermisos, new
-                        {
-                            UsuarioId = usuarioId,
-                            OpcionMenuId = permiso.FkOpcionMenuC,
-                            fkempresa = permiso.FkEmpresaC
-                        }, transaction);
-                    }
+                        UsuarioId = usuarioId,
+                        PermisoId = permisoId,
+                        RolId = usuarioInsertDto.IdRol,
+                        EmpresaId = usuarioInsertDto.IdEmpresa
+                    });
+
+                    await _dbConnection.ExecuteAsync(sqlInsertPermisos, permisosParams, transaction);
                 }
 
-                // Confirmar la transacción
-                transaction.Commit();
-
-                createUsuario.idUsuarioDTO = usuarioId;
-
-                return createUsuario;
+                 transaction.Commit();
+                return usuarioId;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Revertir si hay error
                  transaction.Rollback();
-                throw;
+                throw new ApplicationException($"Error al crear el usuario: {ex.Message}", ex);
             }
         }
 

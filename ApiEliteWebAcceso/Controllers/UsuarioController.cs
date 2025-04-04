@@ -1,4 +1,7 @@
 ﻿using ApiEliteWebAcceso.Application.Contracts;
+using ApiEliteWebAcceso.Application.DTOs.Empresa;
+using ApiEliteWebAcceso.Application.DTOs.Usuario;
+using ApiEliteWebAcceso.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiEliteWebAcceso.Controllers
@@ -35,7 +38,27 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
-        
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreateUsuario([FromBody] UsuarioInsertDto usuarioDto)
+        {
+            var result = await _usuarioService.CreateUsuario(usuarioDto);
+            return result.GetHttpResponse();
+        }
 
+       /* [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateGrupoEmpresa([FromBody] UsuarioDto usuarioDto)
+        {
+            var result = await _usuarioService.UpdateUsuario(usuarioDto);
+            return result.GetHttpResponse();
+        }
+       */
+       /*
+        [HttpDelete("DeleteGrupoEmpresaID/{idGrupoEmpresa}")]
+        public async Task<IActionResult> DeleteGrupoEmpresaID(int idGrupoEmpresa)
+        {
+            var result = await _usuarioService.DeleteGrupoEmpresa(idGrupoEmpresa);
+            return result.GetHttpResponse();
+        }
+       */
     }
 }

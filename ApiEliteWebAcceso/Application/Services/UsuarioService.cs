@@ -20,26 +20,26 @@ namespace ApiEliteWebAcceso.Application.Services
             _config = config;
             _usuarioRepository = usuarioRepository;
         }
-        public async Task<Result<UsuarioDto>> CreateUsuario(UsuarioDto usuarioDto)
+        public async Task<Result<int>> CreateUsuario(UsuarioInsertDto usuarioDto)
         {
             try
             {
                 // Validaciones de datos obligatorios
-                if (string.IsNullOrWhiteSpace(usuarioDto.usuarioDTO)) throw new ArgumentException("El usuario es obligatorio");
-                if (string.IsNullOrWhiteSpace(usuarioDto.documentoDTO)) throw new ArgumentException("El documento es obligatorio");
-                if (string.IsNullOrWhiteSpace(usuarioDto.nombreDTO)) throw new ArgumentException("El nombre es obligatorio");
-                if (usuarioDto.tipoUsuarioDTO == null) throw new ArgumentException("El tipo de usuario es obligatorio");
-                if (string.IsNullOrWhiteSpace(usuarioDto.emailDTO)) throw new ArgumentException("El email es obligatorio");
-                if (string.IsNullOrWhiteSpace(usuarioDto.passwordDTO)) throw new ArgumentException("La contraseña es obligatoria");
-                if (string.IsNullOrWhiteSpace(usuarioDto.estadoDTO)) throw new ArgumentException("El estado es obligatorio");
+                if (string.IsNullOrWhiteSpace(usuarioDto.Usuario)) throw new ArgumentException("El usuario es obligatorio");
+                if (string.IsNullOrWhiteSpace(usuarioDto.Documento)) throw new ArgumentException("El documento es obligatorio");
+                if (string.IsNullOrWhiteSpace(usuarioDto.Nombre)) throw new ArgumentException("El nombre es obligatorio");
+                if (usuarioDto.TipoUsuario == null) throw new ArgumentException("El tipo de usuario es obligatorio");
+                if (string.IsNullOrWhiteSpace(usuarioDto.Email)) throw new ArgumentException("El email es obligatorio");
+                if (string.IsNullOrWhiteSpace(usuarioDto.Password)) throw new ArgumentException("La contraseña es obligatoria");
+                if (string.IsNullOrWhiteSpace(usuarioDto.Estado)) throw new ArgumentException("El estado es obligatorio");
 
-                usuarioDto.passwordDTO = BCryptNet.HashPassword(usuarioDto.passwordDTO);
+                usuarioDto.Password = BCryptNet.HashPassword(usuarioDto.Password);
 
-                return Result<UsuarioDto>.Success(await _usuarioRepository.CreateUsuario(usuarioDto));
+                return Result<int>.Success(await _usuarioRepository.CreateUsuario(usuarioDto));
             }
             catch (Exception ex)
             {
-                return Result<UsuarioDto>.Failure(ex.Message);
+                return Result<int>.Failure(ex.Message);
             }           
 
         }
