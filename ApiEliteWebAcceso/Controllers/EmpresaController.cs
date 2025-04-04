@@ -67,14 +67,14 @@ namespace ApiEliteWebAcceso.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateEmpresa([FromBody] EmpresaDto empresaDto)
+        public async Task<IActionResult> CreateEmpresa([FromBody] EmpresaInsertDto empresaDto)
         {
             var result = await _empresaService.CreateEmpresa(empresaDto);
             return result.GetHttpResponse();
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateEmpresa([FromBody] EmpresaDto empresaDto)
+        public async Task<IActionResult> UpdateEmpresa([FromBody] EmpresaUpdateDto empresaDto)
         {
             var result = await _empresaService.UpdateEmpresa(empresaDto);
             return result.GetHttpResponse();

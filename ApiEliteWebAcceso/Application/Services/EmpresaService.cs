@@ -22,9 +22,9 @@ namespace ApiEliteWebAcceso.Application.Services
             _empresaRepository = authRepository;
         }
 
-        public async Task<Result<EmpresaDto>> CreateEmpresa(EmpresaDto createGrupoEmpresa)
+        public async Task<Result<int>> CreateEmpresa(EmpresaInsertDto createGrupoEmpresa)
         {
-            return Result<EmpresaDto>.Success(await _empresaRepository.CreateEmpresa(createGrupoEmpresa));
+            return Result<int>.Success(await _empresaRepository.CreateEmpresa(createGrupoEmpresa));
         }
 
 
@@ -34,7 +34,7 @@ namespace ApiEliteWebAcceso.Application.Services
         }
 
 
-        public async Task<Result<bool>> UpdateEmpresa(EmpresaDto updateEmpresa)
+        public async Task<Result<bool>> UpdateEmpresa(EmpresaUpdateDto updateEmpresa)
         {
             return Result<bool>.Success(await _empresaRepository.UpdateEmpresa(updateEmpresa));
         }
@@ -118,7 +118,8 @@ namespace ApiEliteWebAcceso.Application.Services
                     usuarioBdDTO = empresa.USUARIO_BD_C,
                     passwordBdDTO = empresa.PASSWORD_BD_C,
                     estadoDTO = empresa.ESTADO_C,
-                    cadenaConexionDTO = $"Server={empresa.SERVIDOR_BD_C};Database={empresa.NOMBRE_BD_C};User Id={empresa.USUARIO_BD_C};Password={empresa.PASSWORD_BD_C};"
+                    cadenaConexionDTO = $"Server={empresa.SERVIDOR_BD_C.Trim()};Database={empresa.NOMBRE_BD_C.Trim()};User Id={empresa.USUARIO_BD_C.Trim()};Password={empresa.PASSWORD_BD_C.Trim()};",
+                    aplicativos = await _empresaRepository.GetPermisoEmpresaAplicativo(empresa.PK_EMPRESA_C)
                 };
 
                 return Result<EmpresaDto>.Success(empresaDto);

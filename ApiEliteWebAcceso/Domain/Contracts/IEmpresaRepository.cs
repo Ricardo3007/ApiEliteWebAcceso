@@ -14,8 +14,8 @@ namespace ApiEliteWebAcceso.Domain.Contracts
 
         Task<List<ACC_EMPRESA>> GetEmpresa();
         Task<ACC_EMPRESA> GetEmpresaID(int idEmpresa);
-        Task<EmpresaDto> CreateEmpresa(EmpresaDto createEmpresa);
-        Task<bool> UpdateEmpresa(EmpresaDto updateEmpresa);
+        Task<int> CreateEmpresa(EmpresaInsertDto createEmpresa);
+        Task<bool> UpdateEmpresa(EmpresaUpdateDto updateEmpresa);
         Task<bool> DeleteEmpresa(int idEmpresa);
 
         //permisos_empresas
@@ -26,6 +26,8 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<bool> DeletePermisoEmpresa(int idPermisoEmpresa);
 
         Task<List<EmpresaPorGrupoDto>> GetEmpresaPorGrupo(int idGrupoEmpresa, bool isSuperAdmin);
+
+        Task<List<PermisoEmpresaAplicativoDTO>> GetPermisoEmpresaAplicativo(int idEmpresa);
 
     }
 }
