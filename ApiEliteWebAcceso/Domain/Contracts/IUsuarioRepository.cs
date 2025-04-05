@@ -13,6 +13,10 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<bool> UpdateUsuario(UsuarioInsertDto updateAplicativo);
         Task<bool> DeleteUsuario(int idUsuario);
 
+        Task<bool> InsertPermisoEmpresa(PermisoEmpresaInsertDTO dto);
+        Task<bool> UpdatePermisoEmpresa(PermisoEmpresaInsertDTO dto);
+        Task<bool> DeletePermisoEmpresa(int idUsuario, int idEmpresa);
+
         Task<List<ACC_PERMISO_USUARIO_EMPRESA>> GetPermisoUsuarioEmpresaID(int idGrupoEmpresa, bool isSuperAdmin);
     }
 }
