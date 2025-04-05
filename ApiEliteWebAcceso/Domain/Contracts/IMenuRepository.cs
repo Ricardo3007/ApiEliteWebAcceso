@@ -8,7 +8,7 @@ namespace ApiEliteWebAcceso.Domain.Contracts
     public interface IMenuRepository
     {
         Task<List<MenuOption>> ObtenerMenuUsuarioRolEmpresa(int idUsuario, int idEmpresa);
-        Task<List<MenuNodeDto>> GetMenuPermiso(int idGrupoEmpresa, int? idRol = null);
+        Task<List<MenuNodeDto>> GetMenuPermiso(List<int> idEmpresas, int? idRol = null);
         Task<List<MenuOption>> GetMenuPadre(int idAplicativo);
         Task<List<MenuPrincipalDTO>> GetMenu();
         Task<MenuPrincipalDTO> GetMenuID(int idMenu);
@@ -17,6 +17,9 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<bool> UpdateMenu(MenuPrincipalDTO menu);
         Task<bool> DeleteMenu(int idMenu);
         Task<List<MenuNodeDto>> GetMenuUsuarioEmpresa(int idEmpresa, int? idRol = null);
+
+        Task<List<MenuNodeDto>> GetMenuPermisoGrupoEmpresa(int idGrupoEmpresa, int? idRol = null);
+
 
     }
 }

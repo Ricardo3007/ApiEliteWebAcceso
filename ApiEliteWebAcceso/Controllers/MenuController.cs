@@ -25,10 +25,11 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
-        [HttpGet("[action]/{idGrupoEmpresa}")]
-        public async Task<IActionResult> GetMenuPermiso(int idGrupoEmpresa, int? idRol = null)
+       
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetMenuPermiso([FromQuery] List<int> idEmpresas, [FromQuery] int? idRol = null)
         {
-            var result = await _menuService.GetMenuPermiso(idGrupoEmpresa, idRol);
+            var result = await _menuService.GetMenuPermiso(idEmpresas, idRol);
             return result.GetHttpResponse();
         }
 
@@ -78,6 +79,13 @@ namespace ApiEliteWebAcceso.Controllers
         public async Task<IActionResult> GetMenuUsuarioEmpresa(int idEmpresa, int? idRol = null)
         {
             var result = await _menuService.GetMenuUsuarioEmpresa(idEmpresa, idRol);
+            return result.GetHttpResponse();
+        }
+
+        [HttpGet("[action]/{idGrupoEmpresa}")]
+        public async Task<IActionResult> GetMenuPermisoGrupoEmpresa(int idGrupoEmpresa, int? idRol = null)
+        {
+            var result = await _menuService.GetMenuPermisoGrupoEmpresa(idGrupoEmpresa, idRol);
             return result.GetHttpResponse();
         }
 

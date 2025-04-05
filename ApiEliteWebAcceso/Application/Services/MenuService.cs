@@ -80,12 +80,12 @@ namespace ApiEliteWebAcceso.Application.Services
         }
 
 
-        public async Task<Result<List<MenuNodeDto>>> GetMenuPermiso(int idGrupoEmpresa, int? idRol = null)
+        public async Task<Result<List<MenuNodeDto>>> GetMenuPermiso(List<int> idEmpresas, int? idRol = null)
         {
 
             try
             {
-                var menulist = await _menuRepository.GetMenuPermiso(idGrupoEmpresa, idRol);
+                var menulist = await _menuRepository.GetMenuPermiso(idEmpresas, idRol);
 
                 return Result<List<MenuNodeDto>>.Success(menulist);
             }
@@ -207,6 +207,23 @@ namespace ApiEliteWebAcceso.Application.Services
             try
             {
                 var menulist = await _menuRepository.GetMenuUsuarioEmpresa(idEmpresa, idRol);
+
+                return Result<List<MenuNodeDto>>.Success(menulist);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<MenuNodeDto>>.Failure(ex.Message);
+            }
+
+        }
+
+
+        public async Task<Result<List<MenuNodeDto>>> GetMenuPermisoGrupoEmpresa(int idGrupoEmpresa, int? idRol = null)
+        {
+
+            try
+            {
+                var menulist = await _menuRepository.GetMenuPermisoGrupoEmpresa(idGrupoEmpresa, idRol);
 
                 return Result<List<MenuNodeDto>>.Success(menulist);
             }
