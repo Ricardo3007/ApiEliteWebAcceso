@@ -199,5 +199,46 @@ namespace ApiEliteWebAcceso.Application.Services
                 return Result<bool>.Failure(ex.Message);
             }
         }
+
+        public async Task<Result<bool>> InsertPermisoEmpresa(PermisoEmpresaInsertDTO dto)
+        {
+            try
+            {
+                var result = await _usuarioRepository.InsertPermisoEmpresa(dto);
+                return Result<bool>.Success(result);
+            }
+            catch (Exception ex)
+            {
+                return Result<bool>.Failure($"Error al insertar permisos por empresa: {ex.Message}");
+            }
+        }
+
+        public async Task<Result<bool>> UpdatePermisoEmpresa(PermisoEmpresaInsertDTO dto)
+        {
+            try
+            {
+                var result = await _usuarioRepository.UpdatePermisoEmpresa(dto);
+                return Result<bool>.Success(result);
+            }
+            catch (Exception ex)
+            {
+                return Result<bool>.Failure($"Error al actualizar permisos por empresa: {ex.Message}");
+            }
+        }
+
+        public async Task<Result<bool>> DeletePermisoEmpresa(int idUsuario, int idEmpresa)
+        {
+            try
+            {
+                var result = await _usuarioRepository.DeletePermisoEmpresa(idUsuario, idEmpresa);
+                return Result<bool>.Success(result);
+            }
+            catch (Exception ex)
+            {
+                return Result<bool>.Failure($"Error al eliminar permisos por empresa: {ex.Message}");
+            }
+        }
+
+
     }
 }

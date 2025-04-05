@@ -59,20 +59,25 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
-        /* [HttpPut("[action]")]
-         public async Task<IActionResult> UpdateGrupoEmpresa([FromBody] UsuarioDto usuarioDto)
-         {
-             var result = await _usuarioService.UpdateUsuario(usuarioDto);
-             return result.GetHttpResponse();
-         }
-        */
-        /*
-         [HttpDelete("DeleteGrupoEmpresaID/{idGrupoEmpresa}")]
-         public async Task<IActionResult> DeleteGrupoEmpresaID(int idGrupoEmpresa)
-         {
-             var result = await _usuarioService.DeleteGrupoEmpresa(idGrupoEmpresa);
-             return result.GetHttpResponse();
-         }
-        */
+        [HttpPost("[action]")]
+        public async Task<IActionResult> CreatePermisoUsuario([FromBody] PermisoEmpresaInsertDTO usuarioDto)
+        {
+            var result = await _usuarioService.InsertPermisoEmpresa(usuarioDto);
+            return result.GetHttpResponse();
+        }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdatePermisoUsuario([FromBody] PermisoEmpresaInsertDTO usuarioDto)
+        {
+            var result = await _usuarioService.UpdatePermisoEmpresa(usuarioDto);
+            return result.GetHttpResponse();
+        }
+
+        [HttpDelete("[action]/{idUsuario}/{idEmpresa}")]
+        public async Task<IActionResult> DeletePermisoUsuario(int idUsuario, int idEmpresa)
+        {
+            var result = await _usuarioService.DeletePermisoEmpresa(idUsuario, idEmpresa);
+            return result.GetHttpResponse();
+        }
     }
 }

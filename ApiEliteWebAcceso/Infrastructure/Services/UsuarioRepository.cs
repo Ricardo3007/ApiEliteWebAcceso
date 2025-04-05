@@ -331,5 +331,138 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             }
         }
 
+        public async Task<bool> InsertPermisoEmpresa(PermisoEmpresaInsertDTO dto)
+        {
+            if (_dbConnection.State != ConnectionState.Open)
+                _dbConnection.Open();
+
+            using (var transaction = _dbConnection.BeginTransaction())
+            {
+                try
+                {
+                    foreach (var empresa in dto.PermisosPorEmpresa)
+                    {
+                        foreach (var permiso in empresa.Permisos)
+                        {
+                            var insertSql = @"
+                        INSERT INTO [dbo].[ACC_PERMISO_USUARIO]
+                            (FK_USUARIO_C, FK_OPCION_MENU_C, FK_EMPRESA_C, FK_ROL_C)
+                        VALUES
+                            (@UsuarioId, @PermisoId, @EmpresaId, @RolId);";
+
+                            await _dbConnection.ExecuteAsync(insertSql, new
+                            {
+                                UsuarioId = dto.IdUsuarioDTO,
+                                PermisoId = permiso,
+                                EmpresaId = empresa.IdEmpresaDTO,
+                                RolId = empresa.IdRolDTO
+                            }, transaction);
+                        }
+                    }
+
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception("Error al insertar permisos por empresa", ex);
+                }
+                finally
+                {
+                    if (_dbConnection.State == ConnectionState.Open)
+                        _dbConnection.Close();
+                }
+            }
+        }
+
+        public async Task<bool> UpdatePermisoEmpresa(PermisoEmpresaInsertDTO dto)
+        {
+            if (_dbConnection.State != ConnectionState.Open)
+                _dbConnection.Open();
+
+            using (var transaction = _dbConnection.BeginTransaction())
+            {
+                try
+                {
+                    var deleteSql = @"
+                                    DELETE FROM [dbo].[ACC_PERMISO_USUARIO]
+                                    WHERE FK_USUARIO_C = @UsuarioId;";
+
+                    await _dbConnection.ExecuteAsync(deleteSql, new { UsuarioId = dto.IdUsuarioDTO }, transaction);
+
+                    // Insertamos los nuevos permisos
+                    foreach (var empresa in dto.PermisosPorEmpresa)
+                    {
+                        foreach (var permiso in empresa.Permisos)
+                        {
+                            var insertSql = @"
+                        INSERT INTO [dbo].[ACC_PERMISO_USUARIO]
+                            (FK_USUARIO_C, FK_OPCION_MENU_C, FK_EMPRESA_C, FK_ROL_C)
+                        VALUES
+                            (@UsuarioId, @PermisoId, @EmpresaId, @RolId);";
+
+                            await _dbConnection.ExecuteAsync(insertSql, new
+                            {
+                                UsuarioId = dto.IdUsuarioDTO,
+                                PermisoId = permiso,
+                                EmpresaId = empresa.IdEmpresaDTO,
+                                RolId = empresa.IdRolDTO
+                            }, transaction);
+                        }
+                    }
+
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception("Error al actualizar permisos por empresa", ex);
+                }
+                finally
+                {
+                    if (_dbConnection.State == ConnectionState.Open)
+                        _dbConnection.Close();
+                }
+            }
+        }
+
+        public async Task<bool> DeletePermisoEmpresa(int idUsuario, int idEmpresa)
+        {
+            if (_dbConnection.State != ConnectionState.Open)
+                _dbConnection.Open();
+
+            using (var transaction = _dbConnection.BeginTransaction())
+            {
+                try
+                {
+                    var deleteSql = @"
+                DELETE FROM [dbo].[ACC_PERMISO_USUARIO]
+                WHERE FK_USUARIO_C = @UsuarioId AND FK_EMPRESA_C = @EmpresaId";
+
+                    var rowsAffected = await _dbConnection.ExecuteAsync(deleteSql, new
+                    {
+                        UsuarioId = idUsuario,
+                        EmpresaId = idEmpresa
+                    }, transaction);
+
+                    transaction.Commit();
+                    return rowsAffected > 0;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception("Error al eliminar permisos por empresa", ex);
+                }
+                finally
+                {
+                    if (_dbConnection.State == ConnectionState.Open)
+                        _dbConnection.Close();
+                }
+            }
+        }
+
+
     }
 }
