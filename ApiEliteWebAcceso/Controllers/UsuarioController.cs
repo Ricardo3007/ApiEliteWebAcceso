@@ -31,10 +31,10 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
-        [HttpGet("[action]/{idUsuario}/{idGrupoEmpresa}/{isSuperAdmin}")]
-        public async Task<IActionResult> GetPermisoUsuarioEmpresaID(int idUsuario, int idGrupoEmpresa, bool isSuperAdmin)
+        [HttpGet("[action]/{idGrupoEmpresa}/{isSuperAdmin}")]
+        public async Task<IActionResult> GetPermisoUsuarioEmpresaID(int idGrupoEmpresa, bool isSuperAdmin)
         {
-            var result = await _usuarioService.GetPermisoUsuarioEmpresaID(idUsuario, idGrupoEmpresa, isSuperAdmin);
+            var result = await _usuarioService.GetPermisoUsuarioEmpresaID(idGrupoEmpresa, isSuperAdmin);
             return result.GetHttpResponse();
         }
 
@@ -45,20 +45,34 @@ namespace ApiEliteWebAcceso.Controllers
             return result.GetHttpResponse();
         }
 
-       /* [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateGrupoEmpresa([FromBody] UsuarioDto usuarioDto)
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateUsuario([FromBody] UsuarioInsertDto usuarioDto)
         {
             var result = await _usuarioService.UpdateUsuario(usuarioDto);
             return result.GetHttpResponse();
         }
-       */
-       /*
-        [HttpDelete("DeleteGrupoEmpresaID/{idGrupoEmpresa}")]
-        public async Task<IActionResult> DeleteGrupoEmpresaID(int idGrupoEmpresa)
+
+        [HttpDelete("[action]/{idUsuario}")]
+        public async Task<IActionResult> DeleteUsuario(int idUsuario)
         {
-            var result = await _usuarioService.DeleteGrupoEmpresa(idGrupoEmpresa);
+            var result = await _usuarioService.DeleteUsuario(idUsuario);
             return result.GetHttpResponse();
         }
-       */
+
+        /* [HttpPut("[action]")]
+         public async Task<IActionResult> UpdateGrupoEmpresa([FromBody] UsuarioDto usuarioDto)
+         {
+             var result = await _usuarioService.UpdateUsuario(usuarioDto);
+             return result.GetHttpResponse();
+         }
+        */
+        /*
+         [HttpDelete("DeleteGrupoEmpresaID/{idGrupoEmpresa}")]
+         public async Task<IActionResult> DeleteGrupoEmpresaID(int idGrupoEmpresa)
+         {
+             var result = await _usuarioService.DeleteGrupoEmpresa(idGrupoEmpresa);
+             return result.GetHttpResponse();
+         }
+        */
     }
 }

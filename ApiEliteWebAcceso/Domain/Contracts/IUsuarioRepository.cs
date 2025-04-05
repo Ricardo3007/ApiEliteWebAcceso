@@ -10,9 +10,9 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<ACC_USUARIO> GetUsuarioID(int idUsuario);
         Task<List<ACC_PERMISO_USUARIO_DETALLE>> GetPermisoUsuarioID(int idUsuario,int idGrupoEmpresa);
         Task<int> CreateUsuario(UsuarioInsertDto createUsuario);
-        Task<bool> UpdateUsuario(UsuarioDto updateAplicativo);
+        Task<bool> UpdateUsuario(UsuarioInsertDto updateAplicativo);
         Task<bool> DeleteUsuario(int idUsuario);
 
-        Task<List<ACC_PERMISO_USUARIO_EMPRESA>> GetPermisoUsuarioEmpresaID(int idUsuario, int idGrupoEmpresa, bool isSuperAdmin);
+        Task<List<ACC_PERMISO_USUARIO_EMPRESA>> GetPermisoUsuarioEmpresaID(int idGrupoEmpresa, bool isSuperAdmin);
     }
 }

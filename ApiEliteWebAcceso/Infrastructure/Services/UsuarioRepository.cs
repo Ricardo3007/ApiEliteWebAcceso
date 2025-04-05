@@ -24,108 +24,146 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
                 _dbConnection.Open();
             }
 
-            using var transaction = _dbConnection.BeginTransaction();
-
-            try
-            {
-                // 1. Insertar el usuario en ACC_USUARIO
-                var sqlInsertUsuario = @"
-                                    INSERT INTO [dbo].[ACC_USUARIO]
-                                        ([USUARIO_C],
-                                         [NOMBRE_USUARIO_C],
-                                         [FK_TDI_C],
-                                         [ID_USUARIO_C],
-                                         [PASSWORD_C],
-                                         [MAIL_USUARIO_C],
-                                         [ESTADO_C],
-                                         [TIPO_USUARIO_C])
-                                    VALUES
-                                        (@Usuario,
-                                         @Nombre,
-                                         1,   
-                                         @Documento,
-                                         @Password,
-                                         @Email,
-                                         @Estado,
-                                         @TipoUsuario);
-                                    SELECT CAST(SCOPE_IDENTITY() as int);";
-
-                var usuarioId = await _dbConnection.ExecuteScalarAsync<int>(sqlInsertUsuario, new
+            using (var transaction = _dbConnection.BeginTransaction())
                 {
-                    usuarioInsertDto.Usuario,
-                    usuarioInsertDto.Documento,
-                    usuarioInsertDto.Nombre,
-                    usuarioInsertDto.TipoUsuario,
-                    usuarioInsertDto.Email,
-                    Password = usuarioInsertDto.HashPassword(), // Password hasheado
-                    usuarioInsertDto.Estado,
-                    usuarioInsertDto.IdEmpresa,
-                    usuarioInsertDto.IdRol
-                }, transaction);
-
-                // 2. Insertar los permisos en ACC_PERMISO_USUARIO
-                if (usuarioInsertDto.Permisos?.Count > 0)
-                {
-                    var sqlInsertPermisos = @"
-                INSERT INTO [dbo].[ACC_PERMISO_USUARIO]
-                    (FK_USUARIO_C, FK_OPCION_MENU_C, FK_EMPRESA_C,FK_ROL_C)
-                VALUES
-                    (@UsuarioId, @PermisoId, @EmpresaId,@RolId);";
-
-                    // Insertar todos los permisos en un solo comando
-                    var permisosParams = usuarioInsertDto.Permisos.Select(permisoId => new
+                    try
                     {
-                        UsuarioId = usuarioId,
-                        PermisoId = permisoId,
-                        RolId = usuarioInsertDto.IdRol,
-                        EmpresaId = usuarioInsertDto.IdEmpresa
-                    });
+                        // Insertar en ACC_USUARIO
+                        var insertUsuarioSql = @"
+                                                INSERT INTO [dbo].[ACC_USUARIO]
+                                                    ([USUARIO_C],
+                                                     [NOMBRE_USUARIO_C],
+                                                     [FK_TDI_C],
+                                                     [ID_USUARIO_C],
+                                                     [PASSWORD_C],
+                                                     [MAIL_USUARIO_C],
+                                                     [ESTADO_C],
+                                                     [TIPO_USUARIO_C])
+                                                VALUES
+                                                    (@Usuario,
+                                                     @Nombre,
+                                                     @TipoDocumento,
+                                                     @Documento,
+                                                     @Password,
+                                                     @Email,
+                                                     @Estado,
+                                                     @TipoUsuario);
+                                                SELECT SCOPE_IDENTITY();";
 
-                    await _dbConnection.ExecuteAsync(sqlInsertPermisos, permisosParams, transaction);
-                }
+                        var idUsuario = await _dbConnection.ExecuteScalarAsync<int>(insertUsuarioSql, new
+                        {
+                            Usuario = usuarioInsertDto.UsuarioDTO,
+                            Nombre = usuarioInsertDto.NombreDTO,
+                            TipoDocumento = 1, // Asumo que este valor va fijo o debes mapearlo si está en el DTO
+                            Documento = usuarioInsertDto.DocumentoDTO,
+                            Password = usuarioInsertDto.PasswordDTO,
+                            Email = usuarioInsertDto.EmailDTO,
+                            Estado = usuarioInsertDto.EstadoDTO,
+                            TipoUsuario = usuarioInsertDto.TipoUsuarioDTO
+                        }, transaction);
 
-                 transaction.Commit();
-                return usuarioId;
+                        transaction.Commit();
+                        return idUsuario;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        // Acá podrías loguear el error si es necesario
+                        throw new Exception("Error al insertar el usuario", ex);
+                    }
+                    finally
+                    {
+                        if (_dbConnection.State == ConnectionState.Open)
+                        {
+                            _dbConnection.Close();
+                        }
+                    }
             }
-            catch (Exception ex)
-            {
-                 transaction.Rollback();
-                throw new ApplicationException($"Error al crear el usuario: {ex.Message}", ex);
-            }
+            
         }
 
-        public Task<bool> DeleteUsuario(int idUsuario)
+        public async Task<bool> DeleteUsuario(int idUsuario)
         {
-            throw new NotImplementedException();
+            if (_dbConnection.State != ConnectionState.Open)
+            {
+                _dbConnection.Open();
+            }
+
+            using (var transaction = _dbConnection.BeginTransaction())
+            {
+                try
+                {
+                    // Eliminar permisos del usuario
+                    var deletePermisosSql = @"
+                                                DELETE FROM [dbo].[ACC_PERMISO_USUARIO]
+                                                WHERE FK_USUARIO_C = @UsuarioId;";
+
+                    await _dbConnection.ExecuteAsync(deletePermisosSql, new
+                    {
+                        UsuarioId = idUsuario
+                    }, transaction);
+
+                    // Eliminar el usuario
+                    var deleteUsuarioSql = @"
+                                            DELETE FROM [dbo].[ACC_USUARIO]
+                                            WHERE PK_USUARIO_C = @UsuarioId;";
+
+                    var rowsAffected = await _dbConnection.ExecuteAsync(deleteUsuarioSql, new
+                    {
+                        UsuarioId = idUsuario
+                    }, transaction);
+
+                    transaction.Commit();
+
+                    // Devuelve true si se eliminó al menos un usuario
+                    return rowsAffected > 0;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception("Error al eliminar el usuario", ex);
+                }
+                finally
+                {
+                    if (_dbConnection.State == ConnectionState.Open)
+                    {
+                        _dbConnection.Close();
+                    }
+                }
+            }
         }
 
-        public async Task<List<ACC_PERMISO_USUARIO_EMPRESA>> GetPermisoUsuarioEmpresaID(int idUsuario ,int idGrupoEmpresa,bool isSuperAdmin)
+        public async Task<List<ACC_PERMISO_USUARIO_EMPRESA>> GetPermisoUsuarioEmpresaID(int idGrupoEmpresa,bool isSuperAdmin)
         {
 
             var sqlQuery = @"
-                             SELECT 
-                                    EMP.PK_EMPRESA_C, 
-                                    EMP.NOMBRE_EMPRESA_C, 
-	                                GR.PK_GRUPO_EMPRESA_C,
-	                                GR.NOMBRE_GRUPO_C,
-                                    CASE 
-                                        WHEN MAX(PER.PK_PERMISO_USUARIO_C) IS NULL THEN 0 
-                                        ELSE 1 
-                                    END AS TIENE_PERMISO -- INDICA SI EL USUARIO TIENE EL PERMISO (1) O NO (0)
-                                FROM ACC_EMPRESA EMP 
-		                                INNER JOIN ACC_GRUPO_EMPRESAS GR ON GR.PK_GRUPO_EMPRESA_C = EMP.FK_GRUPO_EMPRESA_C
-		                                LEFT JOIN ACC_PERMISO_USUARIO PER 
-                                    ON EMP.PK_EMPRESA_C = PER.FK_EMPRESA_C 
-                                    AND PER.FK_USUARIO_C = @PK_USUARIO_C
-                                WHERE 1 = 1
-                                        AND (@isSuperAdmin = 1 OR EMP.FK_GRUPO_EMPRESA_C = @PK_GRUPO_EMPRESA_C)
-                                GROUP BY EMP.PK_EMPRESA_C, EMP.NOMBRE_EMPRESA_C,GR.PK_GRUPO_EMPRESA_C,GR.NOMBRE_GRUPO_C
-                                ORDER BY EMP.NOMBRE_EMPRESA_C";
+                            SELECT 
+                                EMP.PK_EMPRESA_C, 
+                                EMP.NOMBRE_EMPRESA_C, 
+	                            GR.PK_GRUPO_EMPRESA_C,
+	                            GR.NOMBRE_GRUPO_C,
+                                CASE 
+                                    WHEN MAX(PER.PK_PERMISO_EMPRESA_C) IS NULL THEN 0 
+                                    ELSE 1 
+                                END AS TIENE_PERMISO, -- INDICA SI EL USUARIO TIENE EL PERMISO (1) O NO (0)
+	                            CASE 
+                                    WHEN MAX(MENU.PK_OPCION_MENU_C) IS NULL THEN 0 
+                                    ELSE 1 
+                                END AS TIENE_MENU -- INDICA SI EL USUARIO TIENE EL PERMISO (1) O NO (0)
+                            FROM ACC_EMPRESA EMP 
+		                            INNER JOIN ACC_GRUPO_EMPRESAS GR ON GR.PK_GRUPO_EMPRESA_C = EMP.FK_GRUPO_EMPRESA_C
+		                            LEFT JOIN ACC_PERMISO_EMPRESA PER 
+                                ON EMP.PK_EMPRESA_C = PER.FK_EMPRESA_C 
+		                            LEFT JOIN ACC_MENU_ELITE MENU 
+                                ON MENU.FK_APLICATIVO_C = PER.FK_APLICATIVO_C  
+                            WHERE 1 = 1
+                                    AND (@isSuperAdmin = 1 OR EMP.FK_GRUPO_EMPRESA_C = @PK_GRUPO_EMPRESA_C)
+                            GROUP BY EMP.PK_EMPRESA_C, EMP.NOMBRE_EMPRESA_C,GR.PK_GRUPO_EMPRESA_C,GR.NOMBRE_GRUPO_C
+                            ORDER BY EMP.NOMBRE_EMPRESA_C";
 
             // Crear los parámetros para la consulta
             var parameters = new
             {
-                PK_USUARIO_C = idUsuario, // ID del permiso de empresa a buscar
                 isSuperAdmin = isSuperAdmin ? 1 : 0,
                 PK_GRUPO_EMPRESA_C = idGrupoEmpresa
             };
@@ -237,12 +275,61 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             return usuario;
         }
 
-
-
-
-        public Task<bool> UpdateUsuario(UsuarioDto updateAplicativo)
+        public async Task<bool> UpdateUsuario(UsuarioInsertDto usuarioInsertDto)
         {
-            throw new NotImplementedException();
+            if (_dbConnection.State != ConnectionState.Open)
+            {
+                _dbConnection.Open();
+            }
+
+            using (var transaction = _dbConnection.BeginTransaction())
+            {
+                try
+                {
+                    // Actualizar ACC_USUARIO
+                    var updateUsuarioSql = @"
+                                            UPDATE [dbo].[ACC_USUARIO]
+                                            SET 
+                                                USUARIO_C = @Usuario,
+                                                NOMBRE_USUARIO_C = @Nombre,
+                                                FK_TDI_C = @TipoDocumento,
+                                                ID_USUARIO_C = @Documento,
+                                                PASSWORD_C = @Password,
+                                                MAIL_USUARIO_C = @Email,
+                                                ESTADO_C = @Estado,
+                                                TIPO_USUARIO_C = @TipoUsuario
+                                            WHERE PK_USUARIO_C = @IdUsuario;";
+
+                    await _dbConnection.ExecuteAsync(updateUsuarioSql, new
+                    {
+                        Usuario = usuarioInsertDto.UsuarioDTO,
+                        Nombre = usuarioInsertDto.NombreDTO,
+                        TipoDocumento = 1, // Fijo o desde DTO si lo tenés
+                        Documento = usuarioInsertDto.DocumentoDTO,
+                        Password = usuarioInsertDto.PasswordDTO,
+                        Email = usuarioInsertDto.EmailDTO,
+                        Estado = usuarioInsertDto.EstadoDTO,
+                        TipoUsuario = usuarioInsertDto.TipoUsuarioDTO,
+                        IdUsuario = usuarioInsertDto.IdUsuarioDTO
+                    }, transaction);
+
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception("Error al actualizar el usuario", ex);
+                }
+                finally
+                {
+                    if (_dbConnection.State == ConnectionState.Open)
+                    {
+                        _dbConnection.Close();
+                    }
+                }
+            }
         }
+
     }
 }

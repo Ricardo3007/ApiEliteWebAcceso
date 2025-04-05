@@ -7,5 +7,6 @@
         public string? NombreEmpresaDTO { get; set; }
         public string? NombreGrupoDTO { get; set; }
         public int TienePermisoDTO { get; set; }
+        public int TieneMenuDTO { get; set; }
     }
 }

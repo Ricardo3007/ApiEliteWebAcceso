@@ -26,6 +26,7 @@ namespace ApiEliteWebAcceso.Domain.Entities.Acceso
         public string? NOMBRE_EMPRESA_C { get; set; }  
         public string? NOMBRE_GRUPO_C { get; set; }         
         public int TIENE_PERMISO { get; set; }
+        public int TIENE_MENU { get; set; }
     }
 
 
