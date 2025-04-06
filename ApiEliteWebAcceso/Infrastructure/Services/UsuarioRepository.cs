@@ -225,7 +225,7 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             return permisoMenu.ToList();
         }
 
-        public async Task<List<ACC_USUARIO>> GetUsuario()
+        public async Task<List<ACC_USUARIO>> GetUsuario(int tipoUsuario)
         {
             // Crear la consulta SQL para obtener todos los registros
             var sqlQuery = @"
@@ -238,10 +238,14 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
                                   ,[MAIL_USUARIO_C]
                                   ,[ESTADO_C]
                                   ,[TIPO_USUARIO_C]
-                              FROM [dbo].[ACC_USUARIO]";
+                              FROM [dbo].[ACC_USUARIO]
+                              WHERE 
+                                    (@TipoUsuario = 1)
+                                    OR (@TipoUsuario = 2 AND TIPO_USUARIO_C = 3)
+                                    OR (@TipoUsuario = 3 AND 1 = 0) -- Esto fuerza que no se devuelva nada cuando sea 3";
 
             // Ejecutar la consulta y mapear los resultados a una lista de ACC_USUARIO
-            var usuario = await _dbConnection.QueryAsync<ACC_USUARIO>(sqlQuery);
+            var usuario = await _dbConnection.QueryAsync<ACC_USUARIO>(sqlQuery,new { TipoUsuario  = tipoUsuario });
 
             // Convertir el resultado a una lista y retornarla
             return usuario.ToList();
@@ -463,6 +467,39 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             }
         }
 
+        public async Task<PermisoEmpresaInsertDTO> GetPermisoUsuarioID(int idUsuario)
+        {
+            var sql = @"
+                        SELECT 
+                            FK_USUARIO_C,
+                            FK_EMPRESA_C,
+                            FK_ROL_C,
+                            FK_OPCION_MENU_C
+                        FROM ACC_PERMISO_USUARIO
+                        WHERE FK_USUARIO_C = @IdUsuario
+                    ";
 
+            var parametros = new { IdUsuario = idUsuario };
+
+            var permisos = (await _dbConnection.QueryAsync<dynamic>(sql, parametros)).ToList();
+
+            var permisosPorEmpresa = permisos
+                .GroupBy(p => new { Empresa = (int)p.FK_EMPRESA_C, Rol = (int)p.FK_ROL_C })
+                .Select(g => new PermisoEmpresaUsuarioDTO
+                {
+                    IdEmpresaDTO = g.Key.Empresa,
+                    IdRolDTO = g.Key.Rol,
+                    Permisos = g.Select(p => (int)p.FK_OPCION_MENU_C).Distinct().ToList()
+                })
+                .ToList();
+
+            var resultado = new PermisoEmpresaInsertDTO
+            {
+                IdUsuarioDTO = idUsuario,
+                PermisosPorEmpresa = permisosPorEmpresa
+            };
+
+            return resultado;
+        }
     }
 }

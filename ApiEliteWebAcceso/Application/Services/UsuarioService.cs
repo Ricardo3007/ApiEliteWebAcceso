@@ -85,12 +85,12 @@ namespace ApiEliteWebAcceso.Application.Services
             }
         }
 
-        public async Task<Result<List<UsuarioDto>>> GetUsuario()
+        public async Task<Result<List<UsuarioDto>>> GetUsuario(int tipoUsuario)
         {
             try
             {
                 // Obtener la lista de empresas desde el repositorio
-                var usuarios = await _usuarioRepository.GetUsuario();
+                var usuarios = await _usuarioRepository.GetUsuario(tipoUsuario);
 
                 // Mapear la lista de ACC_EMPRESA a EmpresaDto
                 var usuariosDto = usuarios.Select(e => new UsuarioDto
@@ -102,6 +102,7 @@ namespace ApiEliteWebAcceso.Application.Services
                     emailDTO = e.MAIL_USUARIO_C,
                     passwordDTO = e.PASSWORD_C,
                     tipoUsuarioDTO = e.TIPO_USUARIO_C,
+                    nombreTipoUsuarioDTO = e.TIPO_USUARIO_C == 1 ? "Superadministrador" : e.TIPO_USUARIO_C == 2 ? "Administrador" : "Estandar",
                 }).ToList();
 
                 return Result<List<UsuarioDto>>.Success(usuariosDto);
@@ -122,39 +123,6 @@ namespace ApiEliteWebAcceso.Application.Services
                 {
                     return Result<UsuarioDto>.Failure("Usuario no encontrado.");
                 }
-
-                /* var permisoUsuario = await _usuarioRepository.GetPermisoUsuarioID(idUsuario, idGrupoEmpresa);
-                 var permisosDto = permisoUsuario
-                 .Select(p => new PermisoUsuarioDto
-                 {
-                     PkPermisoUsuarioC = p.PK_PERMISO_USUARIO_C,
-                     FkUsuarioC = p.FK_USUARIO_C,
-                     FkOpcionMenuC = p.FK_OPCION_MENU_C,
-                     DescripcionMenuC = p.DESCRIPCION_C,
-                     FkEmpresaC = p.FK_EMPRESA_C,
-                     NombreEmpresaC = p.NOMBRE_EMPRESA_C,
-                     FkGrupoEmpresaC = p.FK_GRUPO_EMPRESA_C,
-                     InicialesAplicativoC = p.INICIALES_APLICATIVO_C,
-                     NombreAplicativoC = p.NOMBRE_APLICATIVO_C,
-                     OrdenAplicativoC = p.ORDEN_C,
-                     tienepermiso = p.PERMISO_C
-
-                 })
-                 .ToList();
-                */
-
-                /*
-                 var empresaUsu = await _usuarioRepository.GetPermisoUsuarioEmpresaID(idGrupoEmpresa, false);
-
-                 var permisoEmpresaDTO = empresaUsu.Select(e => new UsuarioEmpresaPermisoDto
-                 {
-                     EmpresaIdDTO = e.PK_EMPRESA_C,
-                     NombreEmpresaDTO = e.NOMBRE_EMPRESA_C,
-                     GrupoEmpresaIdDTO = e.PK_GRUPO_EMPRESA_C,
-                     NombreGrupoDTO = e.NOMBRE_GRUPO_C,
-                     TienePermisoDTO = e.TIENE_PERMISO
-                 }).ToList();
-                 */
                 var resultUsuario = new UsuarioDto
                 {
                     idUsuarioDTO = usuario.PK_USUARIO_C,
@@ -239,6 +207,17 @@ namespace ApiEliteWebAcceso.Application.Services
             }
         }
 
-
+        public async Task<Result<PermisoEmpresaInsertDTO>> GetPermisoUsuarioID(int idUsuario)
+        {
+            try
+            {
+                var result = await _usuarioRepository.GetPermisoUsuarioID(idUsuario);
+                return Result<PermisoEmpresaInsertDTO>.Success(result);
+            }
+            catch (Exception ex)
+            {
+                return Result<PermisoEmpresaInsertDTO>.Failure($"Error al Consultar permisos por usuario: {ex.Message}");
+            }
+        }
     }
 }

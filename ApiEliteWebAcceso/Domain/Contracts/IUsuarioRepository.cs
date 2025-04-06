@@ -6,7 +6,7 @@ namespace ApiEliteWebAcceso.Domain.Contracts
 {
     public interface IUsuarioRepository
     {
-        Task<List<ACC_USUARIO>> GetUsuario();
+        Task<List<ACC_USUARIO>> GetUsuario(int tipoUsuario);
         Task<ACC_USUARIO> GetUsuarioID(int idUsuario);
         Task<List<ACC_PERMISO_USUARIO_DETALLE>> GetPermisoUsuarioID(int idUsuario,int idGrupoEmpresa);
         Task<int> CreateUsuario(UsuarioInsertDto createUsuario);
@@ -16,6 +16,7 @@ namespace ApiEliteWebAcceso.Domain.Contracts
         Task<bool> InsertPermisoEmpresa(PermisoEmpresaInsertDTO dto);
         Task<bool> UpdatePermisoEmpresa(PermisoEmpresaInsertDTO dto);
         Task<bool> DeletePermisoEmpresa(int idUsuario, int idEmpresa);
+        Task<PermisoEmpresaInsertDTO> GetPermisoUsuarioID(int idUsuario);
 
         Task<List<ACC_PERMISO_USUARIO_EMPRESA>> GetPermisoUsuarioEmpresaID(int idGrupoEmpresa, bool isSuperAdmin);
     }

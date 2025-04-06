@@ -17,10 +17,10 @@ namespace ApiEliteWebAcceso.Controllers
         }
 
 
-       [HttpGet("[action]")]
-        public async Task<IActionResult> GetUsuario()
+       [HttpGet("[action]/{tipoUsuario}")]
+        public async Task<IActionResult> GetUsuario(int tipoUsuario)
         {
-            var result = await _usuarioService.GetUsuario();
+            var result = await _usuarioService.GetUsuario(tipoUsuario);
             return result.GetHttpResponse();
         }
 
@@ -77,6 +77,13 @@ namespace ApiEliteWebAcceso.Controllers
         public async Task<IActionResult> DeletePermisoUsuario(int idUsuario, int idEmpresa)
         {
             var result = await _usuarioService.DeletePermisoEmpresa(idUsuario, idEmpresa);
+            return result.GetHttpResponse();
+        }
+
+        [HttpGet("[action]/{idUsuario}")]
+        public async Task<IActionResult> GetPermisoUsuarioID(int idUsuario)
+        {
+            var result = await _usuarioService.GetPermisoUsuarioID(idUsuario);
             return result.GetHttpResponse();
         }
     }

@@ -32,6 +32,7 @@ builder.Services.AddScoped<IEmpresaRepository, EmpresaRepository>();
 builder.Services.AddScoped<IAplicativoRepository, AplicativoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+builder.Services.AddScoped<ITipoIdentificacionRepository, TipoIdentificacionRepository>();
 
 // Registra servicios
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -40,6 +41,8 @@ builder.Services.AddScoped<IEmpresaService, EmpresaService>();
 builder.Services.AddScoped<IAplicacionService, AplicativoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IRolesService, RolesService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<ITipoIdentificacioService, TipoIdentificacioService>();
 
 #region CORS
 builder.Services.AddCors(options =>
