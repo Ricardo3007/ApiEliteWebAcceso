@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ignorar imágenes de logos subidas dinámicamente
+wwwroot/uploads/logos/*
+!wwwroot/uploads/logos/.gitkeep
+ApiEliteWebAcceso/wwwroot/uploads/logos/05dd6573-4992-41f6-9679-1266af838289.png
+ApiEliteWebAcceso/wwwroot/uploads/logos/1c543ec5-bc16-4a76-afa2-3faa8037c2eb.png

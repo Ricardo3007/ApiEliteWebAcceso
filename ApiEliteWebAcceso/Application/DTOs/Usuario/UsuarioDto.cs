@@ -16,6 +16,7 @@ namespace ApiEliteWebAcceso.Application.DTOs.Usuario
         public string? nombreDTO { get; set; }
 
         public int? tipoUsuarioDTO { get; set; }
+        public int? TdiDTO { get; set; }
         public string? nombreTipoUsuarioDTO { get; set; }
 
         public string? emailDTO { get; set; }

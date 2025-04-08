@@ -238,6 +238,7 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
                                   ,[MAIL_USUARIO_C]
                                   ,[ESTADO_C]
                                   ,[TIPO_USUARIO_C]
+                                  ,[FK_TDI_C]
                               FROM [dbo].[ACC_USUARIO]
                               WHERE 
                                     (@TipoUsuario = 1)

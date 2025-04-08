@@ -1,13 +1,14 @@
 ﻿using ApiEliteWebAcceso.Application.Contracts;
 using ApiEliteWebAcceso.Application.DTOs.Empresa;
 using ApiEliteWebAcceso.Application.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiEliteWebAcceso.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EmpresaController
+    public class EmpresaController : ControllerBase
     {
         private readonly IEmpresaService _empresaService;
         public EmpresaController(IEmpresaService empresaService)
@@ -94,6 +95,32 @@ namespace ApiEliteWebAcceso.Controllers
             var result = await _empresaService.GetEmpresaPorGrupo(idGrupoEmpresa,isSuperAdmin);
             return result.GetHttpResponse();
         }
+
+
+        [HttpPost("upload-logo")]
+        public async Task<IActionResult> UploadLogo(IFormFile logo)
+        {
+            if (logo == null || logo.Length == 0)
+                return BadRequest("No se proporcionó un archivo");
+
+            // wwwroot/uploads/logos ejemplo
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "logos");
+
+            if (!Directory.Exists(uploadsFolder)) // si no existe la creamos
+                Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(logo.FileName);
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await logo.CopyToAsync(stream);
+            }
+
+            var relativePath = $"/uploads/logos/{fileName}";
+            return Ok(new { imageUrl = relativePath });
+        }
+
 
     }
 }

@@ -75,6 +75,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseStaticFiles(); // esto permite servir archivos de wwwroot
 
 app.UseCors("CorsPolicy");
 

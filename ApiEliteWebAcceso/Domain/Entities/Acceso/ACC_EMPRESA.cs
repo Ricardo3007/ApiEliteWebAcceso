@@ -25,6 +25,9 @@ public partial class ACC_EMPRESA
 
     public string ESTADO_C { get; set; } = null!;
 
+    public string NOMBRE_GRUPO_C { get; set; } = null;
+
+
     public virtual ICollection<ACC_PERMISO_EMPRESA> ACC_PERMISO_EMPRESA { get; set; } = new List<ACC_PERMISO_EMPRESA>();
 
     public virtual ACC_GRUPO_EMPRESAS FK_GRUPO_EMPRESA_CNavigation { get; set; } = null!;

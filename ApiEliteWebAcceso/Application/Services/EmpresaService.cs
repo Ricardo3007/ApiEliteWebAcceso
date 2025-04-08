@@ -83,6 +83,7 @@ namespace ApiEliteWebAcceso.Application.Services
                     usuarioBdDTO = e.USUARIO_BD_C,
                     passwordBdDTO = e.PASSWORD_BD_C,
                     estadoDTO = e.ESTADO_C,
+                    nombreGrupoDTO = e.NOMBRE_GRUPO_C,
                     cadenaConexionDTO = $"Server={e.SERVIDOR_BD_C};Database={e.NOMBRE_BD_C};User Id={e.USUARIO_BD_C};Password={e.PASSWORD_BD_C};"
                 }).ToList();
 

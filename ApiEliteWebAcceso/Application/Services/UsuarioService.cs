@@ -102,6 +102,8 @@ namespace ApiEliteWebAcceso.Application.Services
                     emailDTO = e.MAIL_USUARIO_C,
                     passwordDTO = e.PASSWORD_C,
                     tipoUsuarioDTO = e.TIPO_USUARIO_C,
+                    TdiDTO = e.FK_TDI_C,
+                    estadoDTO = e.ESTADO_C,
                     nombreTipoUsuarioDTO = e.TIPO_USUARIO_C == 1 ? "Superadministrador" : e.TIPO_USUARIO_C == 2 ? "Administrador" : "Estandar",
                 }).ToList();
 
@@ -155,10 +157,19 @@ namespace ApiEliteWebAcceso.Application.Services
                 if (string.IsNullOrWhiteSpace(usuarioDto.NombreDTO)) throw new ArgumentException("El nombre es obligatorio");
                 if (usuarioDto.TipoUsuarioDTO == null) throw new ArgumentException("El tipo de usuario es obligatorio");
                 if (string.IsNullOrWhiteSpace(usuarioDto.EmailDTO)) throw new ArgumentException("El email es obligatorio");
-                if (string.IsNullOrWhiteSpace(usuarioDto.PasswordDTO)) throw new ArgumentException("La contraseña es obligatoria");
+                //if (string.IsNullOrWhiteSpace(usuarioDto.PasswordDTO)) throw new ArgumentException("La contraseña es obligatoria");
                 if (string.IsNullOrWhiteSpace(usuarioDto.EstadoDTO)) throw new ArgumentException("El estado es obligatorio");
 
-                usuarioDto.PasswordDTO = BCryptNet.HashPassword(usuarioDto.PasswordDTO);
+
+                if (!string.IsNullOrWhiteSpace(usuarioDto.PasswordDTO))
+                {
+                    usuarioDto.PasswordDTO = BCryptNet.HashPassword(usuarioDto.PasswordDTO);
+                }
+                else
+                {
+                    var usuarioActual = await _usuarioRepository.GetUsuarioID(usuarioDto.IdUsuarioDTO);
+                    usuarioDto.PasswordDTO = usuarioActual.PASSWORD_C; 
+                }
 
                 return Result<bool>.Success(await _usuarioRepository.UpdateUsuario(usuarioDto));
             }
