@@ -137,7 +137,7 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
                               ,AE.[ESTADO_C]
 							  ,AGE.[NOMBRE_GRUPO_C]
 							  FROM ACC_EMPRESA AE
-							  INNER JOIN [ACC_GRUPO_EMPRESAS] AGE ON AGE.[PK_GRUPO_EMPRESA_C] = AE.[PK_EMPRESA_C];";
+							  INNER JOIN [ACC_GRUPO_EMPRESAS] AGE ON AGE.[PK_GRUPO_EMPRESA_C] = AE.[FK_GRUPO_EMPRESA_C];";
 
             var result = await _dbConnection.QueryAsync<ACC_EMPRESA>(consulta);
 
