@@ -42,13 +42,13 @@ namespace ApiEliteWebAcceso.Application.DTOs.Usuario
     public class PermisoEmpresaInsertDTO
     {
         public int IdUsuarioDTO { get; set; }
-        public List<PermisoEmpresaUsuarioDTO> PermisosPorEmpresa { get; set; }
+        public List<PermisoEmpresaUsuarioDTO> ?PermisosPorEmpresa { get; set; }
     }
 
     public class PermisoEmpresaUsuarioDTO
     {
         public int IdEmpresaDTO { get; set; }
-        public int IdRolDTO { get; set; }
-        public List<int> Permisos { get; set; }
+        public int ?IdRolDTO { get; set; }
+        public List<int> ?Permisos { get; set; }
     }
 }
