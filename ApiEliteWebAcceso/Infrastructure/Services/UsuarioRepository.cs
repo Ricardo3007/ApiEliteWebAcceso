@@ -371,7 +371,7 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    throw new Exception("Error al insertar permisos por empresa", ex);
+                    throw new Exception(ex.Message, ex);
                 }
                 finally
                 {
@@ -390,17 +390,47 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
             {
                 try
                 {
+                    // 1. Obtener roles actuales del usuario antes de eliminarlos
+                    var rolesExistentesQuery = @"
+                                                SELECT FK_EMPRESA_C AS EmpresaId, FK_ROL_C AS RolId
+                                                FROM [dbo].[ACC_PERMISO_USUARIO]
+                                                WHERE FK_USUARIO_C = @UsuarioId;";
+
+                    var rolesExistentes = (await _dbConnection.QueryAsync<(int EmpresaId, int? RolId)>(
+                        rolesExistentesQuery,
+                        new { UsuarioId = dto.IdUsuarioDTO },
+                        transaction
+                    ))
+                    .GroupBy(x => x.EmpresaId)
+                    .ToDictionary(g => g.Key, g => g.First().RolId);
+
+                    // 2. Eliminar permisos anteriores
                     var deleteSql = @"
                                     DELETE FROM [dbo].[ACC_PERMISO_USUARIO]
                                     WHERE FK_USUARIO_C = @UsuarioId;";
 
                     await _dbConnection.ExecuteAsync(deleteSql, new { UsuarioId = dto.IdUsuarioDTO }, transaction);
 
-                    // Insertamos los nuevos permisos
+                    // 3. Insertar nuevos permisos
                     foreach (var empresa in dto.PermisosPorEmpresa)
                     {
                         foreach (var permiso in empresa.Permisos)
                         {
+                            int? rolId;
+
+                            if (empresa.IdRolDTO != null && empresa.IdRolDTO != 0)
+                            {
+                                rolId = empresa.IdRolDTO;
+                            }
+                            else if (rolesExistentes.TryGetValue(empresa.IdEmpresaDTO, out var rolExistente) && rolExistente != null && rolExistente != 0)
+                            {
+                                rolId = rolExistente;
+                            }
+                            else
+                            {
+                                rolId = null;//throw new Exception($"Rol requerido para el usuario {dto.IdUsuarioDTO} en la empresa {empresa.IdEmpresaDTO}.");
+                            }
+
                             var insertSql = @"
                         INSERT INTO [dbo].[ACC_PERMISO_USUARIO]
                             (FK_USUARIO_C, FK_OPCION_MENU_C, FK_EMPRESA_C, FK_ROL_C)
@@ -412,7 +442,7 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
                                 UsuarioId = dto.IdUsuarioDTO,
                                 PermisoId = permiso,
                                 EmpresaId = empresa.IdEmpresaDTO,
-                                RolId = empresa.IdRolDTO
+                                RolId = rolId
                             }, transaction);
                         }
                     }
@@ -423,7 +453,7 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    throw new Exception("Error al actualizar permisos por empresa", ex);
+                    throw new Exception(ex.Message, ex);
                 }
                 finally
                 {
@@ -432,6 +462,9 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
                 }
             }
         }
+
+
+
 
         public async Task<bool> DeletePermisoEmpresa(int idUsuario, int idEmpresa)
         {
@@ -458,7 +491,7 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    throw new Exception("Error al eliminar permisos por empresa", ex);
+                    throw new Exception(ex.Message, ex);
                 }
                 finally
                 {
@@ -474,7 +507,7 @@ namespace ApiEliteWebAcceso.Infrastructure.Services
                         SELECT 
                             FK_USUARIO_C,
                             FK_EMPRESA_C,
-                            FK_ROL_C,
+                            ISNULL(FK_ROL_C,0) FK_ROL_C,
                             FK_OPCION_MENU_C
                         FROM ACC_PERMISO_USUARIO
                         WHERE FK_USUARIO_C = @IdUsuario
